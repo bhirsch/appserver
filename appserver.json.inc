@@ -91,10 +91,8 @@ function appserver_get_app($n) {
   $app->version = $node->field_app_version['und'][0]['safe_value'];
   $app->author = $node->field_app_author['und'][0]['safe_value'];
   $app->author_url = $node->field_app_author_url['und'][0]['safe_value'];
-  // @todo Looking at Phase II's manifest, it looks like screenshots are expected 
-  //  to be a numeric array. Revisit this when we get to catalog UI.
-  // "screenshots" : ["http://appserver.openpublicapp.com/sites/default/files/apps/ideation-screenshot1.jpg"],
-  $app->screenshots = $node->field_app_screenshots['und'][0]['safe_value'];
+  $app->screenshots = _appserver_app_screenshots($node->field_app_screenshots['und']);
+  //$app->screenshots = _appserver_app_screenshots($node->field_app_screenshots['und'][0]['safe_value']);
   $app->logo = $node->field_app_logo['und'][0]['safe_value'];
   $app->machine_name = $node->field_app_machine_name['und'][0]['safe_value'];
   $app->downloadable = $downloadable['list'];
@@ -205,4 +203,21 @@ function _appserver_downloadable($node) {
   } 
 
   return $output;
+}
+
+/**
+ * @param $screenshots
+ *  Array of field values for screenshots.
+ *
+ * @return
+ *  Array of screenshots, like this: 
+ *  $screenshots = array('url1', 'url2', 'urlN');
+ */
+function _appserver_app_screenshots($screenshots) {
+  $urls = array();
+  foreach ($screenshots as $screenshot) {
+    $urls[] = $screenshot['safe_value'];
+  }
+
+  return $urls;
 }
