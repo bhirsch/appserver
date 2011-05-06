@@ -1,0 +1,40 @@
+<?php
+/**
+ * @file
+ * Code for the App Server feature.
+ */
+
+include_once('appserver.features.inc');
+
+/**
+ * Implements hook_menu().
+ */
+function appserver_menu() {
+  $items = array();
+
+  // Get all apps for selected distro like this: 
+  // appserver/apps/[distro]/json
+  // appserver/apps/[distroA]+[distroB]+[distroC]/json
+  $items['appserver/apps/%/json'] = array(
+    'title' => 'App Manifest: All Apps',
+    'description' => 'Return a JSON manifest for all apps available on app server.',
+    'page callback' => 'appserver_apps',
+    'page arguments' => array(2),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'appserver.json.inc',
+  );
+  // Get a single app.
+  //$items['appserver/app/%node/json'] = array(
+  $items['appserver/app/%/json'] = array(
+    'title' => 'App Manifest: One App',
+    'description' => 'Return a JSON manifest for the individual app selected.',
+    'page callback' => 'appserver_app',
+    'page arguments' => array(2),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'appserver.json.inc',
+  );
+
+  return $items;
+}
