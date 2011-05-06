@@ -64,7 +64,7 @@ function appserver_app($nid) {
  *  Or node id.
  * 
  * @return
- *  $app object.
+ *  $app array.
  */
 function appserver_get_app($n) {
   // Get $node object. 
@@ -83,22 +83,25 @@ function appserver_get_app($n) {
   $libraries = _appserver_app_libraries($node);
 
   // Assemble app components.
-  $app = new stdClass;
-  $app->name = $node->title;
+  $app = array();
+  $app['name'] = $node->title;
   // @todo Create a small function for each field to return a value, rather than 
   //  hard code undefined language (und) here, and to prevent annoying no index errors.
-  $app->description = $node->field_app_demo_content_descript['und'][0]['safe_value'];
-  $app->version = $node->field_app_version['und'][0]['safe_value'];
-  $app->author = $node->field_app_author['und'][0]['safe_value'];
-  $app->author_url = $node->field_app_author_url['und'][0]['safe_value'];
-  $app->screenshots = _appserver_app_screenshots($node->field_app_screenshots['und']);
-  //$app->screenshots = _appserver_app_screenshots($node->field_app_screenshots['und'][0]['safe_value']);
-  $app->logo = $node->field_app_logo['und'][0]['safe_value'];
-  $app->machine_name = $node->field_app_machine_name['und'][0]['safe_value'];
-  $app->downloadable = $downloadable['list'];
-  $app->dependencies = $dependencies['list'];
-  $app->libraries = $libraries['list'];
-  $app->downloadables = array_merge($downloadable['urls'], $dependencies['urls'], $libraries['urls']);
+  $app['description'] = $node->field_app_demo_content_descript['und'][0]['safe_value'];
+  $app['machine_name'] = $node->field_app_machine_name['und'][0]['safe_value'];
+  $app['version'] = $node->field_app_version['und'][0]['safe_value'];
+  $app['downloadable'] = $downloadable['list'];
+  $app['author'] = $node->field_app_author['und'][0]['safe_value'];
+  $app['author_url'] = $node->field_app_author_url['und'][0]['safe_value'];
+  $app['screenshots'] = _appserver_app_screenshots($node->field_app_screenshots['und']);
+  $app['logo'] = $node->field_app_logo['und'][0]['safe_value'];
+  $app['demo content module'] = ''; // TODO
+  $app['demo content description'] = ''; // TODO
+  $app['rating'] = array(); // TODO
+  $app['comments'] = array();; // TODO
+  $app['dependencies'] = $dependencies['list']; 
+  $app['libraries'] = $libraries['list'];
+  $app['downloadables'] = array_merge($downloadable['urls'], $dependencies['urls'], $libraries['urls']);
 
   return $app;
 }
