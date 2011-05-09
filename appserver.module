@@ -8,6 +8,11 @@ include_once('appserver.features.inc');
 
 /**
  * Implements hook_menu().
+ * 
+ * @todo Reconsider whether any of these callbacks are necessary. 
+ *   If the entire app catalog is going to live in an iframe, the only 
+ *   reason to do this JSON call back stuff would be to make our apps 
+ *   available in Phase2's app store.
  */
 function appserver_menu() {
   $items = array();
