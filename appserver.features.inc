@@ -27,8 +27,8 @@ function appserver_node_info() {
       'title_label' => t('Name'),
       'help' => '',
     ),
-    'downloadable' => array(
-      'name' => t('Downloadable'),
+    'drupal_project' => array(
+      'name' => t('Drupal project'),
       'base' => 'node_content',
       'description' => '',
       'has_title' => '1',
