@@ -73,7 +73,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '3',
+        'weight' => '8',
       ),
     ),
   );
@@ -141,7 +141,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '4',
+        'weight' => '9',
       ),
     ),
   );
@@ -208,7 +208,7 @@ function appserver_field_default_fields() {
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '0',
+        'weight' => '5',
       ),
     ),
   );
@@ -276,7 +276,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '6',
+        'weight' => '11',
       ),
     ),
   );
@@ -344,7 +344,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '5',
+        'weight' => '10',
       ),
     ),
   );
@@ -374,7 +374,7 @@ function appserver_field_default_fields() {
       'settings' => array(
         'referenceable_types' => array(
           'app' => 0,
-          'downloadable' => 'downloadable',
+          'drupal_project' => 'drupal_project',
           'library' => 0,
           'page' => 0,
         ),
@@ -382,8 +382,8 @@ function appserver_field_default_fields() {
           'args' => array(
             0 => '',
           ),
-          'display_name' => 'references_1',
-          'view_name' => 'downloadables',
+          'display_name' => '',
+          'view_name' => '',
         ),
       ),
       'translatable' => '1',
@@ -425,7 +425,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '7',
+        'weight' => '12',
       ),
     ),
   );
@@ -493,88 +493,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '-1',
-      ),
-    ),
-  );
-
-  // Exported field: 'node-app-field_app_downloadable'
-  $fields['node-app-field_app_downloadable'] = array(
-    'field_config' => array(
-      'active' => '1',
-      'cardinality' => '1',
-      'deleted' => '0',
-      'entity_types' => array(),
-      'field_name' => 'field_app_downloadable',
-      'foreign keys' => array(
-        'nid' => array(
-          'columns' => array(
-            'nid' => 'nid',
-          ),
-          'table' => 'node',
-        ),
-      ),
-      'indexes' => array(
-        'nid' => array(
-          0 => 'nid',
-        ),
-      ),
-      'module' => 'node_reference',
-      'settings' => array(
-        'referenceable_types' => array(
-          'app' => 0,
-          'downloadable' => 'downloadable',
-          'library' => 0,
-          'page' => 0,
-        ),
-        'view' => array(
-          'args' => array(
-            0 => '',
-          ),
-          'display_name' => 'references_1',
-          'view_name' => 'downloadables',
-        ),
-      ),
-      'translatable' => '1',
-      'type' => 'node_reference',
-    ),
-    'field_instance' => array(
-      'bundle' => 'app',
-      'default_value' => NULL,
-      'deleted' => '0',
-      'description' => 'This is the app\'s "core" module.',
-      'display' => array(
-        'default' => array(
-          'label' => 'above',
-          'module' => 'node_reference',
-          'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 1,
-        ),
-        'teaser' => array(
-          'label' => 'above',
-          'settings' => array(),
-          'type' => 'hidden',
-          'weight' => 0,
-        ),
-      ),
-      'entity_type' => 'node',
-      'field_name' => 'field_app_downloadable',
-      'label' => 'Downloadable',
-      'required' => 0,
-      'settings' => array(
-        'user_register_form' => FALSE,
-      ),
-      'widget' => array(
-        'active' => 1,
-        'module' => 'node_reference',
-        'settings' => array(
-          'autocomplete_match' => 'contains',
-          'autocomplete_path' => 'node_reference/autocomplete',
-          'size' => '60',
-        ),
-        'type' => 'node_reference_autocomplete',
-        'weight' => '-3',
+        'weight' => '4',
       ),
     ),
   );
@@ -604,7 +523,7 @@ function appserver_field_default_fields() {
       'settings' => array(
         'referenceable_types' => array(
           'app' => 0,
-          'downloadable' => 0,
+          'drupal_project' => 'drupal_project',
           'library' => 'library',
           'page' => 0,
         ),
@@ -612,8 +531,8 @@ function appserver_field_default_fields() {
           'args' => array(
             0 => '',
           ),
-          'display_name' => 'references_2',
-          'view_name' => 'downloadables',
+          'display_name' => '',
+          'view_name' => '',
         ),
       ),
       'translatable' => '1',
@@ -655,7 +574,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '8',
+        'weight' => '13',
       ),
     ),
   );
@@ -723,7 +642,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '1',
+        'weight' => '6',
       ),
     ),
   );
@@ -791,7 +710,88 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '-4',
+        'weight' => '1',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-app-field_app_primary_project'
+  $fields['node-app-field_app_primary_project'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_app_primary_project',
+      'foreign keys' => array(
+        'nid' => array(
+          'columns' => array(
+            'nid' => 'nid',
+          ),
+          'table' => 'node',
+        ),
+      ),
+      'indexes' => array(
+        'nid' => array(
+          0 => 'nid',
+        ),
+      ),
+      'module' => 'node_reference',
+      'settings' => array(
+        'referenceable_types' => array(
+          'app' => 0,
+          'drupal_project' => 'drupal_project',
+          'library' => 0,
+          'page' => 0,
+        ),
+        'view' => array(
+          'args' => array(
+            0 => '',
+          ),
+          'display_name' => '',
+          'view_name' => '',
+        ),
+      ),
+      'translatable' => '1',
+      'type' => 'node_reference',
+    ),
+    'field_instance' => array(
+      'bundle' => 'app',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'node_reference',
+          'settings' => array(),
+          'type' => 'node_reference_default',
+          'weight' => 13,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_app_primary_project',
+      'label' => 'Primary project',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'node_reference',
+        'settings' => array(
+          'autocomplete_match' => 'contains',
+          'autocomplete_path' => 'node_reference/autocomplete',
+          'size' => '60',
+        ),
+        'type' => 'node_reference_autocomplete',
+        'weight' => '2',
       ),
     ),
   );
@@ -859,7 +859,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '2',
+        'weight' => '7',
       ),
     ),
   );
@@ -927,13 +927,13 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '-2',
+        'weight' => '3',
       ),
     ),
   );
 
-  // Exported field: 'node-downloadable-field_downloadable_core'
-  $fields['node-downloadable-field_downloadable_core'] = array(
+  // Exported field: 'node-drupal_project-field_downloadable_core'
+  $fields['node-drupal_project-field_downloadable_core'] = array(
     'field_config' => array(
       'active' => '1',
       'cardinality' => '1',
@@ -959,7 +959,7 @@ function appserver_field_default_fields() {
       'type' => 'list_text',
     ),
     'field_instance' => array(
-      'bundle' => 'downloadable',
+      'bundle' => 'drupal_project',
       'default_value' => array(
         0 => array(
           'value' => '7.x',
@@ -999,8 +999,8 @@ function appserver_field_default_fields() {
     ),
   );
 
-  // Exported field: 'node-downloadable-field_downloadable_url'
-  $fields['node-downloadable-field_downloadable_url'] = array(
+  // Exported field: 'node-drupal_project-field_downloadable_url'
+  $fields['node-drupal_project-field_downloadable_url'] = array(
     'field_config' => array(
       'active' => '1',
       'cardinality' => '1',
@@ -1028,7 +1028,7 @@ function appserver_field_default_fields() {
       'type' => 'text',
     ),
     'field_instance' => array(
-      'bundle' => 'downloadable',
+      'bundle' => 'drupal_project',
       'default_value' => NULL,
       'deleted' => '0',
       'description' => '',
@@ -1067,8 +1067,8 @@ function appserver_field_default_fields() {
     ),
   );
 
-  // Exported field: 'node-downloadable-field_downloadable_version'
-  $fields['node-downloadable-field_downloadable_version'] = array(
+  // Exported field: 'node-drupal_project-field_downloadable_version'
+  $fields['node-drupal_project-field_downloadable_version'] = array(
     'field_config' => array(
       'active' => '1',
       'cardinality' => '1',
@@ -1096,7 +1096,7 @@ function appserver_field_default_fields() {
       'type' => 'text',
     ),
     'field_instance' => array(
-      'bundle' => 'downloadable',
+      'bundle' => 'drupal_project',
       'default_value' => NULL,
       'deleted' => '0',
       'description' => '1.0
@@ -1286,11 +1286,10 @@ function appserver_field_default_fields() {
   t('Demo Content Module');
   t('Dependencies');
   t('Distribution');
-  t('Downloadable');
   t('Libraries');
   t('Machine Name');
+  t('Primary project');
   t('Screen Shot (URL)');
-  t('This is the app\'s "core" module.');
   t('URL');
   t('Version');
 
