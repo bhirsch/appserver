@@ -393,7 +393,7 @@ function appserver_field_default_fields() {
       'bundle' => 'app',
       'default_value' => NULL,
       'deleted' => '0',
-      'description' => '',
+      'description' => 'Drupal projects required by this app.',
       'display' => array(
         'default' => array(
           'label' => 'above',
@@ -523,7 +523,7 @@ function appserver_field_default_fields() {
       'settings' => array(
         'referenceable_types' => array(
           'app' => 0,
-          'drupal_project' => 'drupal_project',
+          'drupal_project' => 0,
           'library' => 'library',
           'page' => 0,
         ),
@@ -542,7 +542,7 @@ function appserver_field_default_fields() {
       'bundle' => 'app',
       'default_value' => NULL,
       'deleted' => '0',
-      'description' => '',
+      'description' => 'Third-party, non-Drupal projects required by this app.',
       'display' => array(
         'default' => array(
           'label' => 'above',
@@ -759,7 +759,7 @@ function appserver_field_default_fields() {
       'bundle' => 'app',
       'default_value' => NULL,
       'deleted' => '0',
-      'description' => '',
+      'description' => 'Primary Drupal project containing app-specific logic.',
       'display' => array(
         'default' => array(
           'label' => 'above',
@@ -1286,10 +1286,13 @@ function appserver_field_default_fields() {
   t('Demo Content Module');
   t('Dependencies');
   t('Distribution');
+  t('Drupal projects required by this app.');
   t('Libraries');
   t('Machine Name');
+  t('Primary Drupal project containing app-specific logic.');
   t('Primary project');
   t('Screen Shot (URL)');
+  t('Third-party, non-Drupal projects required by this app.');
   t('URL');
   t('Version');
 
