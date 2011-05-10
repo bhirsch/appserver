@@ -1,0 +1,4 @@
+core = "7.x"
+description = "Map fields to drush_make projects and libraries."
+name = "Make Field"
+project = "makefield"
