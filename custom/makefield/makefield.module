@@ -1,25 +1,22 @@
 <?php
 /**
- * @file video_filter_field.module
+ * @file makefield.module
  */
 
 /**
  * Implements hook_field_info().
  */
-function video_filter_field_field_info() {
+function makefield_field_info() {
   return array(
-    'video_filter' => array(
-      'label' => t('Video Filter'),
-      'description' => t('This field stores URLs and settings to be '
-                       . 'handled by the Video Filter module.'),
+    'makefield' => array(
+      'label' => t('.Make Field'),
+      'description' => t('This field provides multiple text boxes '
+                        .'for providing all the info required for a single '
+                        .'Drupal project or library in a drush_make .make file.'),
       'settings' => array(),
-      'instance_settings' => array(
-        'max_height' => 400,
-        'max_width' => 400,
-        'autoplay' => 0,
-      ),
-      'default_widget' => 'video_filter_field_default',
-      'default_formatter' => 'video_filter_field_default',
+      'instance_settings' => array(),
+      'default_widget' => 'makefield_default',
+      'default_formatter' => 'makefield_default',
     ),
   );  
 }
@@ -27,29 +24,180 @@ function video_filter_field_field_info() {
 /**
  * Implements magic callback / psuedo-hook mymodule_field_schema().
  */
-function video_filter_field_field_schema($field) {
-  if ($field['type'] == 'video_filter') {
-    $schema['columns']['url'] = array(
+function makefield_field_schema($field) {
+  if ($field['type'] == 'makefield') {
+    $schema['columns']['name'] = array(
+      'type' => 'varchar',
+      'length' => 80,
+      'not null' => FALSE,
+    );
+    // project_type is either "project" or "library".
+    // This corresponds to lines in .make like this: 
+    // projects[cck][subdir] = ...
+    // libraries[jquery_ui][download][...
+    $schema['columns']['project_type'] = array(
+      'type' => 'varchar',
+      'length' => 20,
+      'not null' => FALSE,
+    );
+    // The following columns correspond to array keys in drush make like this: 
+    //   projects[project_name][column_name] = value
+    // For example: 
+    //   projects[mtheme][version] = 1.0
+    $schema['columns']['version'] = array(
+      'type' => 'varchar',
+      'length' => 20,
+      'not null' => FALSE,
+    );
+    $schema['columns']['subdir'] = array(
       'type' => 'varchar',
       'length' => 255,
       'not null' => FALSE,
     );
-    $schema['columns']['height'] = array(
-      'type' => 'int',
+    $schema['columns']['location'] = array(
+      'type' => 'varchar',
+      'length' => 255,
       'not null' => FALSE,
     );
-    $schema['columns']['width'] = array(
-      'type' => 'int',
+    $schema['columns']['type'] = array(
+      'type' => 'varchar',
+      'length' => 255,
       'not null' => FALSE,
     );
-    $schema['columns']['autoplay'] = array(
-      'type' => 'int',
+    $schema['columns']['directory_name'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['l10n_path'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['l10n_url'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // Project download options are stored in columns named
+    // download_key. This gets re-written in .make files like this: 
+    // projects[project_name][download][key] = value
+    //
+    // Download type is either: file, bzr, cvs, git, or svn.
+    $schema['columns']['download_type'] = array(
+      'type' => 'varchar',
+      'length' => 20,
+      'not null' => FALSE,
+    );
+    $schema['columns']['download_url'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // file only: 
+    //   Checksum is an exception to the pattern above. Type is either: 
+    //   md5, sha1, sha256, or sha512. The value is the value of the hash.
+    $schema['columns']['download_checksum_type'] = array(
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => FALSE,
+    );
+    $schema['columns']['download_checksum_value'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['request_type'] = array(
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => FALSE,
+    );
+    $schema['columns']['data'] = array(
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => FALSE,
+    );
+    $schema['columns']['filename'] = array(
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => FALSE,
+    );
+    // cvs only: 
+    $schema['columns']['date'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['root'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['module'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // git and cvs: 
+    $schema['columns']['revision'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // git only: 
+    $schema['columns']['branch'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['tag'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // svn only: 
+    $schema['columns']['interactive'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['username'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['password'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+
+    // .make files allow you to have multiple patches per 
+    // project. This field only allows one patch per project.
+    //
+    // projects[project_name][patch][][url] = value
+    $schema['columns']['patch_url'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // projects[project_name][patch][][md5] = value
+    $schema['columns']['patch_md5'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+
+    // libraries[library_name][destination] = value
+    $schema['columns']['library_destination'] = array(
+      'type' => 'varchar',
+      'length' => 255,
       'not null' => FALSE,
     );
 
     $schema['indexes'] = array(
-      'height' => array('height'),
-      'width' => array('width'),
+      'height' => array('name'),
+      'width' => array('version'),
     );
 
     return $schema;
@@ -59,12 +207,13 @@ function video_filter_field_field_schema($field) {
 /**
  * Implements magic callback / psuedo-hook mymodule_field_is_empty().
  */
-function video_filter_field_field_is_empty($item, $field) {
-  if ($field['type'] == 'video_filter') {
-    if (empty($item['url']) && empty($item['height']) 
-      && empty($item['width']) && empty($item['autoplay'])) 
-    {
-      return TRUE; 
+function makefield_field_is_empty($item, $field) {
+  if ($field['type'] == 'makefield') {
+    // TODO
+    if (!empty($item['name'])) {
+      //@todo add empty handling here. 
+      //return TRUE; 
+      return FALSE;
     } else {
       return FALSE; 
     }
@@ -75,7 +224,7 @@ function video_filter_field_field_is_empty($item, $field) {
  * Implements magic callback / psuedo-hook mymodule_field_settings_form().
  */
 /*
-function video_filter_field_settings_form($field, $instance, $has_data) {
+function makefield_settings_form($field, $instance, $has_data) {
   if ($field['type'] == 'video_filter') {
     $settings = $field['setings'];  
     $form = '';
@@ -87,18 +236,20 @@ function video_filter_field_settings_form($field, $instance, $has_data) {
 /**
  * Implements hook_field_validate().
  */
-function video_filter_field_field_validate($obj_type, $object, $field,
+function makefield_field_validate($obj_type, $object, $field,
                                            $instance, $langcode, &$items,
                                            &$errors) {
-  if ($field['type'] == 'video_filter') {
+  if ($field['type'] == 'makefield') {
     foreach ($items as $delta => $item) {
-      // Test URL. 
-      if (!empty($item['url'])) {
+      if (!empty($item['name'])) {
+        // @todo Add validation here.
+
         //$errors[$field['field_name']][$langcode][$delta][] = array(
         //  'error' => 'video_filter_url',
         //  'message'  => t('Video Filter Field: Invalid video URL'),
         //);
         // If URL isn't empty, we need a height.
+        /*
         if (empty($item['height']) || !is_numeric($item['height'])) {
           $errors[$field['field_name']][$langcode][$delta][] = array( 
             'error' => 'video_filter_height',
@@ -112,11 +263,11 @@ function video_filter_field_field_validate($obj_type, $object, $field,
             'message' => t('Video Filter Field: Invalid video width'),
           );
         }
+        // */
       } 
-      // URL field is empty. Set everything else to empty.
       else {
-        unset($items);    
-        unset($object->field_media_url);    
+        //unset($items);    
+        //unset($object->field_media_url);    
       }
     } 
   }  
@@ -126,12 +277,12 @@ function video_filter_field_field_validate($obj_type, $object, $field,
 /**
  * Implements hook_field_widget_info().
  */
-function video_filter_field_field_widget_info() {
+function makefield_field_widget_info() {
   return array(
-    'video_filter' => array(
-      'label' => t('Video Filter'),
-      'description' => t('Enable user to determine height, width, and autoplay settings'),
-      'field types' => array('video_filter'),
+    'makefield' => array(
+      'label' => t('.make field'),
+      'description' => t('Enable user to describe projects and libraries for drush_make.'),
+      'field types' => array('makefield'),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
@@ -143,42 +294,245 @@ function video_filter_field_field_widget_info() {
 /**
  * Implements hook_field_widget_form().
  */
-function video_filter_field_field_widget_form(&$form, &$form_state, $field,
+function makefield_field_widget_form(&$form, &$form_state, $field,
                                         $instance, $langcode, $items,
                                         $delta, $element) {
   $base = $element;   
   //dsm($element);
   //dsm($instance,' instance');
   
-  if ($instance['widget']['type'] == 'video_filter') {
-    $element['url'] = array(
+  if ($instance['widget']['type'] == 'makefield') {
+    $element['name'] = array(
       '#type' => 'textfield',
-      '#title' => t('Video URL'),
-      '#default_value' => isset($items[$delta]['url']) ? 
-                          $items[$delta]['url'] : NULL,
+      '#title' => t('Machine Name'),
+      '#default_value' => isset($items[$delta]['name']) ? 
+                          $items[$delta]['name'] : NULL,
       '#weight' => 0,
       ) + $base;
-    $element['height'] = array(
+    $element['project_type'] = array(
       '#type' => 'textfield',
-      '#title' => t('Height'),
-      '#default_value' => isset($items[$delta]['height']) ? 
-                          $items[$delta]['height'] : NULL,
+      '#title' => t('PROJECT TYPE. REPLACE WITH SELECT LIST.'),
+      '#default_value' => isset($items[$delta]['project_type']) ? 
+                          $items[$delta]['project_type'] : 'project',
       '#weight' => 1,
+      '#description' => t('project or library'),
       ) + $base;
-    $element['width'] = array(
+    $element['version'] = array(
       '#type' => 'textfield',
-      '#title' => t('Width'),
-      '#default_value' => isset($items[$delta]['width']) ? 
-                          $items[$delta]['width'] : NULL,
+      '#title' => t('Version'),
+      '#default_value' => isset($items[$delta]['version']) ? 
+                          $items[$delta]['version'] : NULL,
       '#weight' => 2,
+      '#description' => t('Specifies the version of the project to retrieve. '
+                        . 'This can be as loose as the major branch number or '
+                        . 'as specific as a particular point release.'),
     ) + $base;
-    $element['autoplay'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Autoplay'),
-      '#default_value' => isset($items[$delta]['autoplay']) ? 
-                          $items[$delta]['autoplay'] : FALSE,
+    $element['subdir'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Subdirectory'),
+      '#default_value' => isset($items[$delta]['subdir']) ? 
+                          $items[$delta]['subdir'] : NULL,
       '#weight' => 3,
+      '#description' => t('Place a project within a subdirectory of sites/all/modules/contrib.'),
     ) + $base;
+    $element['location'] = array(
+      '#type' => 'textfield',
+      '#title' => t('location'),
+      '#default_value' => isset($items[$delta]['location']) ? 
+                          $items[$delta]['location'] : NULL,
+      '#weight' => 2,
+      '#description' => t('URL of an alternate project update XML server to '
+                        . 'use. Allows project XML data to be retrieved from '
+                        . 'sites other than `updates.drupal.org'),
+    ) + $base;
+    $element['type'] = array(
+      '#type' => 'textfield',
+      '#title' => t('type'),
+      '#default_value' => isset($items[$delta]['type']) ? 
+                          $items[$delta]['type'] : NULL,
+      '#weight' => 2,
+      '#description' => t('The project type. Must be provided if an update '
+        . 'XML source is not specified and/or using version control or direct '
+        . 'retrieval for a project. May be one of the following values: core, '
+        . 'module, profile, theme.'),
+    ) + $base;
+    $element['directory_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('directory_name'),
+      '#default_value' => isset($items[$delta]['directory_name']) ? 
+                          $items[$delta]['directory_name'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['l10n_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('l10n_url'),
+      '#default_value' => isset($items[$delta]['l10n_url']) ? 
+                          $items[$delta]['l10n_url'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['l10n_path'] = array(
+      '#type' => 'textfield',
+      '#title' => t('l10n_path'),
+      '#default_value' => isset($items[$delta]['l10n_path']) ? 
+                          $items[$delta]['l10n_path'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['download_type'] = array(
+      '#type' => 'textfield',
+      '#title' => t('download_type'),
+      '#default_value' => isset($items[$delta]['download_type']) ? 
+                          $items[$delta]['download_type'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['download_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('download_url'),
+      '#default_value' => isset($items[$delta]['download_url']) ? 
+                          $items[$delta]['download_url'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['download_checksum_type'] = array(
+      '#type' => 'textfield',
+      '#title' => t('download_checksum_type'),
+      '#default_value' => isset($items[$delta]['download_checksum_type']) ? 
+                          $items[$delta]['download_checksum_type'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['download_checksum_value'] = array(
+      '#type' => 'textfield',
+      '#title' => t('download_checksum_value'),
+      '#default_value' => isset($items[$delta]['download_checksum_value']) ? 
+                          $items[$delta]['download_checksum_value'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['request_type'] = array(
+      '#type' => 'textfield',
+      '#title' => t('request_type'),
+      '#default_value' => isset($items[$delta]['request_type']) ? 
+                          $items[$delta]['request_type'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['data'] = array(
+      '#type' => 'textfield',
+      '#title' => t('data'),
+      '#default_value' => isset($items[$delta]['data']) ? 
+                          $items[$delta]['data'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['filename'] = array(
+      '#type' => 'textfield',
+      '#title' => t('filename'),
+      '#default_value' => isset($items[$delta]['filename']) ? 
+                          $items[$delta]['filename'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['date'] = array(
+      '#type' => 'textfield',
+      '#title' => t('date'),
+      '#default_value' => isset($items[$delta]['date']) ? 
+                          $items[$delta]['date'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['root'] = array(
+      '#type' => 'textfield',
+      '#title' => t('root'),
+      '#default_value' => isset($items[$delta]['root']) ? 
+                          $items[$delta]['root'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['module'] = array(
+      '#type' => 'textfield',
+      '#title' => t('module'),
+      '#default_value' => isset($items[$delta]['module']) ? 
+                          $items[$delta]['module'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['revision'] = array(
+      '#type' => 'textfield',
+      '#title' => t('revision'),
+      '#default_value' => isset($items[$delta]['revision']) ? 
+                          $items[$delta]['revision'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['branch'] = array(
+      '#type' => 'textfield',
+      '#title' => t('branch'),
+      '#default_value' => isset($items[$delta]['branch']) ? 
+                          $items[$delta]['branch'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['tag'] = array(
+      '#type' => 'textfield',
+      '#title' => t('tag'),
+      '#default_value' => isset($items[$delta]['tag']) ? 
+                          $items[$delta]['tag'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['interactive'] = array(
+      '#type' => 'textfield',
+      '#title' => t('interactive'),
+      '#default_value' => isset($items[$delta]['interactive']) ? 
+                          $items[$delta]['interactive'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['username'] = array(
+      '#type' => 'textfield',
+      '#title' => t('username'),
+      '#default_value' => isset($items[$delta]['username']) ? 
+                          $items[$delta]['username'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['password'] = array(
+      '#type' => 'textfield',
+      '#title' => t('password'),
+      '#default_value' => isset($items[$delta]['password']) ? 
+                          $items[$delta]['password'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['patch_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('patch_url'),
+      '#default_value' => isset($items[$delta]['patch_url']) ? 
+                          $items[$delta]['patch_url'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['patch_md5'] = array(
+      '#type' => 'textfield',
+      '#title' => t('patch_md5'),
+      '#default_value' => isset($items[$delta]['patch_md5']) ? 
+                          $items[$delta]['patch_md5'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['library_destination'] = array(
+      '#type' => 'textfield',
+      '#title' => t('library_destination'),
+      '#default_value' => isset($items[$delta]['library_destination']) ? 
+                          $items[$delta]['library_destination'] : NULL,
+      '#weight' => 2,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+
   }
   return $element;
 }
@@ -186,11 +540,11 @@ function video_filter_field_field_widget_form(&$form, &$form_state, $field,
 /**
  * Implements hook_field_formatter_info().
  */
-function video_filter_field_field_formatter_info() { 
+function makefield_field_formatter_info() { 
   return array(
-    'video_filter_field_default' => array(
-      'label' => t('Video Filter'),
-      'field types' => array('text', 'video_filter'),
+    'makefield_default' => array(
+      'label' => t('Make Field'),
+      'field types' => array('makefield'),
     ),
   );
 } 
@@ -198,7 +552,7 @@ function video_filter_field_field_formatter_info() {
 /**
  * Implements hook_field_formatter_view().
  */
-function video_filter_field_field_formatter_view($obj_type, $object, $field, 
+function makefield_field_formatter_view($obj_type, $object, $field, 
                                            $instance, $langcode, $items, 
                                            $display) { 
 
@@ -214,12 +568,15 @@ dsm($items,'items');
 
   $elements = array();
   foreach ($items as $delta => $item) {
+  /*
+    // TODO add preprocessing here? 
     $url = url($item['url']);
     $text = "[video:$url]";
+  // */
 
     $elements[$delta] = array(
-      '#theme' => 'video_filter_field_default_formatter',
-      '#item' => video_filter_field_process($text),
+      '#theme' => 'makefield_default_formatter',
+      '#item' => check_plain($item),
     );
   }
 
@@ -229,9 +586,9 @@ dsm($items,'items');
 /**
  * Implements hook_theme().
  */
-function video_filter_field_theme() {
+function makefield_theme() {
   return array(
-    'video_filter_field_default_formatter' => array(
+    'makefield_default_formatter' => array(
       'variables' => array('item' => NULL),
     ),
   );
@@ -239,190 +596,10 @@ function video_filter_field_theme() {
 }
 
 /**
- * Returns HTML for a video_filter_field_formatter
+ * Returns HTML for a makefield_formatter
  */
-function theme_video_filter_field_default_formatter($variables) {
-  $output = '<div class="video-filter-field">' . $variables['item'] . '</div>';
+function theme_makefield_default_formatter($variables) {
+  $output = '<div class="makefield">' . $variables['item'] . '</div>';
 
   return $output;
-}
-
-/**
- * Implement video_filter processing from video_filter module.
- * 
- * @see _video_filter_process()
- */
-function video_filter_field_process($text) {
-$filter = new stdClass(); 
-//$filter->format = ''; 
-//$filter->module = 'video_filter';
-//$filter->name = 'video_filter'; 
-//$filter->weight = -1;
-$filter->status = 1;
-$filter->settings = array(
-  'video_filter_width' => 400,
-  'video_filter_height' => 400,
-  'video_filter_autoplay' => 0,
-  'video_filter_related' => 1,
-);
-
-    $text = (string)$text; // Make sure $text is a string. 
-    if (preg_match_all('/\[video(\:(.+))?( .+)?\]/isU', $text, $matches_code)) {
-    foreach ($matches_code[0] as $ci => $code) {
-      $video = array(
-        'source' => $matches_code[2][$ci],
-        'autoplay' => $filter->settings['video_filter_autoplay'],
-        'related' => $filter->settings['video_filter_related'],
-      );
-
-      // Pick random out of multiple sources separated by ','
-      if (strstr($video['source'], ',')) {
-        $sources          = explode(',', $video['source']);
-        $random           = array_rand($sources, 1);
-        $video['source']  = $sources[$random];
-      }
-
-      // Load all codecs
-      $codecs = module_invoke_all('codec_info');
-
-      // Find codec
-      foreach ($codecs AS $codec_name => $codec) {
-        if (!is_array($codec['regexp'])) {
-          $codec['regexp'] = array($codec['regexp']);
-        }
-
-        // Try different regular expressions
-        foreach ($codec['regexp'] as $delta => $regexp) {
-          if (preg_match($regexp, $video['source'], $matches)) {
-            $video['codec'] = $codec;
-            $video['codec']['delta'] = $delta;
-            $video['codec']['matches'] = $matches;
-            $video['codec']['codec_name'] = $codec_name; // used in theme function
-            $video['codec']['control_bar_height'] = 0; // default
-            break 2;
-          }
-        }
-      }
-
-      // Codec found
-      if (isset($video['codec'])) {
-        // Override default attributes
-        if ($matches_code[3][$ci] && preg_match_all('/\s+([a-zA-Z_]+)\:(\s+)?([0-9a-zA-Z\/]+)/i', $matches_code[3][$ci], $matches_attributes)) {
-          foreach ($matches_attributes[0] AS $ai => $attribute) {
-            $video[$matches_attributes[1][$ai]] = $matches_attributes[3][$ai];
-          }
-        }
-
-        // Use configured ratio if present, use that from the codec otherwise
-        $ratio = 1;
-        if (isset($video['ratio']) && preg_match('/(\d+)\/(\d+)/', $video['ratio'], $tratio) ) {
-          //validate given ratio parameter
-          $ratio = $tratio[1] / $tratio[2];
-        }
-        else {
-          $ratio = $video['codec']['ratio'];
-        }
-
-        // Sets video width & height after any user input has been parsed.
-        // First, check if user has set a width.
-        if (isset($video['width']) && !isset($video['height'])) {
-          $video['height'] = variable_get('video_filter_height_'.$format, 400);
-        }
-        // Else, if user has set height.
-        elseif (isset($video['height']) && !isset($video['width'])) {
-          $video['width'] = $video['height'] * $ratio;
-        }
-        // Maybe both?
-        elseif (isset($video['height']) && isset($video['width'])) {
-          $video['width'] = $video['width'];
-          $video['height'] = $video['height'];
-        }
-        // Fall back to defaults.
-        elseif (!isset($video['height']) && !isset($video['width'])) {
-          $video['width'] = $filter->settings['video_filter_width'];
-          $video['height'] = $filter->settings['video_filter_height'];
-        }
-
-        // Default value for control bar height
-        $control_bar_height = 0;
-        if (isset($video['control_bar_height'])) {
-          // respect control_bar_height option if present
-          $control_bar_height = $video['control_bar_height'];
-        }
-        elseif (isset($video['codec']['control_bar_height'])) {
-          // respect setting provided by codec otherwise
-          $control_bar_height = $video['codec']['control_bar_height'];
-        }
-
-        // Resize to fit within width and height repecting aspect ratio
-        if ($ratio) {
-          $scale_factor = min(array(($video['height']-$control_bar_height), $video['width']/($ratio)));
-          $video['height'] = round($scale_factor + $control_bar_height);
-          $video['width'] = round($scale_factor * $ratio);
-        }
-
-        $video['autoplay'] = (bool) $video['autoplay'];
-        $video['align'] = (isset($video['align']) && in_array($video['align'], array('left', 'right', 'center'))) ? $video['align'] : NULL;
-
-        if (is_callable($video['codec']['callback'], FALSE)) {
-          $replacement = call_user_func($video['codec']['callback'], $video);
-        }
-        else {
-          // Invalid callback
-          $replacement = '<!-- VIDEO FILTER - INVALID CALLBACK IN: ' . $pattern . ' -->';
-        }
-      // Invalid format
-      }
-      else {
-        $replacement = '<!-- VIDEO FILTER - INVALID CODEC IN: ' . $code . ' -->';
-      }
-
-      $text = str_replace($code, $replacement, $text);
-    }
-  }
-
-  return $text;
-}
-
-/**
- * Test support for URL.
- *
- * @todo Implement hook_codec_info() to...
- * - add support for whatever media module uses as an alternative to video_filter module.
- * - add support for http://embed.ly/.
- * 
- * @param $url
- *  string, URL which may or may not include media of some kind.
- * 
- * @return
- *  TRUE, video_filter recognizes and supports media at this URL
- *  FALSE, video_filter doesn't recognize it. This could be either because
- *    the URL doesn't actually provide media or because we just doen't have
- *    the codec for it.
- */
-function video_filter_field_url_is_supported($url) {
-  // Load all codecs
-  module_load_include('inc', 'video_filter', 'video_filter.codecs');
-  $codecs = module_invoke_all('codec_info');
-
-  // Find codec
-  foreach ($codecs AS $codec_name => $codec) {
-    if (!is_array($codec['regexp'])) {
-      $codec['regexp'] = array($codec['regexp']);
-    }
-
-    // Try different regular expressions
-    $video = array();
-    foreach ($codec['regexp'] as $delta => $regexp) {
-      if (preg_match($regexp, $url)) {
-        $video['codec'] = TRUE;
-      }
-      break;
-    }
-    break;
-  }
-  // If we found a codec, this URL is supported. 
-  $is_supported = (isset($video['codec'])) ? TRUE : FALSE;
-
-  return $is_supported;
 }
