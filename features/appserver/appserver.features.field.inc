@@ -427,6 +427,96 @@ function appserver_field_default_fields() {
     ),
   );
 
+  // Exported field: 'node-app-field_app_makefield'
+  $fields['node-app-field_app_makefield'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '-1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_app_makefield',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'height' => array(
+          0 => 'name',
+        ),
+        'width' => array(
+          0 => 'version',
+        ),
+      ),
+      'module' => 'makefield',
+      'settings' => array(),
+      'translatable' => '1',
+      'type' => 'makefield',
+    ),
+    'field_instance' => array(
+      'bundle' => 'app',
+      'default_value' => array(
+        0 => array(
+          'branch' => '',
+          'data' => '',
+          'date' => '',
+          'directory_name' => '',
+          'download_checksum_type' => '',
+          'download_checksum_value' => '',
+          'download_type' => '',
+          'download_url' => '',
+          'filename' => '',
+          'interactive' => '',
+          'l10n_path' => '',
+          'l10n_url' => '',
+          'library_destination' => '',
+          'location' => '',
+          'module' => '',
+          'name' => '',
+          'password' => '',
+          'patch_md5' => '',
+          'patch_url' => '',
+          'project_type' => 'project',
+          'request_type' => '',
+          'revision' => '',
+          'root' => '',
+          'subdir' => '',
+          'tag' => '',
+          'type' => '',
+          'username' => '',
+          'version' => '',
+        ),
+      ),
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'makefield',
+          'settings' => array(),
+          'type' => 'makefield_default',
+          'weight' => 18,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_app_makefield',
+      'label' => 'Drupal projects and third-party libraries',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 0,
+        'module' => 'makefield',
+        'settings' => array(),
+        'type' => 'makefield',
+        'weight' => '19',
+      ),
+    ),
+  );
+
   // Exported field: 'node-app-field_app_screenshots'
   $fields['node-app-field_app_screenshots'] = array(
     'field_config' => array(
@@ -580,6 +670,7 @@ function appserver_field_default_fields() {
   t('Author\'s Website');
   t('Distribution');
   t('Drupal Core Version');
+  t('Drupal projects and third-party libraries');
   t('Logo');
   t('Machine Name');
   t('Screen Shots');
