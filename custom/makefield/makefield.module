@@ -209,11 +209,9 @@ function makefield_field_schema($field) {
  */
 function makefield_field_is_empty($item, $field) {
   if ($field['type'] == 'makefield') {
-    // TODO
-    if (!empty($item['name'])) {
+    if (empty($item['name'])) {
       //@todo add empty handling here. 
-      //return TRUE; 
-      return FALSE;
+      return TRUE; 
     } else {
       return FALSE; 
     }
@@ -294,6 +292,7 @@ function makefield_field_widget_info() {
 /**
  * Implements hook_field_widget_form().
  */
+// CONTINUE HERE. TIDY UP NODE EDIT FORM. 
 function makefield_field_widget_form(&$form, &$form_state, $field,
                                         $instance, $langcode, $items,
                                         $delta, $element) {
@@ -307,229 +306,227 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#title' => t('Machine Name'),
       '#default_value' => isset($items[$delta]['name']) ? 
                           $items[$delta]['name'] : NULL,
-      '#weight' => 0,
-      ) + $base;
-    $element['project_type'] = array(
-      '#type' => 'textfield',
-      '#title' => t('PROJECT TYPE. REPLACE WITH SELECT LIST.'),
-      '#default_value' => isset($items[$delta]['project_type']) ? 
-                          $items[$delta]['project_type'] : 'project',
       '#weight' => 1,
-      '#description' => t('project or library'),
       ) + $base;
     $element['version'] = array(
       '#type' => 'textfield',
       '#title' => t('Version'),
       '#default_value' => isset($items[$delta]['version']) ? 
                           $items[$delta]['version'] : NULL,
-      '#weight' => 2,
       '#description' => t('Specifies the version of the project to retrieve. '
                         . 'This can be as loose as the major branch number or '
                         . 'as specific as a particular point release.'),
+      '#weight' => 2,
     ) + $base;
-    $element['subdir'] = array(
+    $element['project_type'] = array(
+      '#type' => 'textfield',
+      '#title' => t('PROJECT TYPE. REPLACE WITH SELECT LIST.'),
+      '#default_value' => isset($items[$delta]['project_type']) ? 
+                          $items[$delta]['project_type'] : 'project',
+      '#description' => t('project or library'),
+      '#weight' => 3,
+      ) + $base;
+    // Advanced settings
+    $element['advanced_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Advanced Settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 4,
+    );
+    // File directory.
+    $element['advanced_settings']['directory_group'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'file directory',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $element['advanced_settings']['directory_group']['subdir'] = array(
       '#type' => 'textfield',
       '#title' => t('Subdirectory'),
       '#default_value' => isset($items[$delta]['subdir']) ? 
                           $items[$delta]['subdir'] : NULL,
-      '#weight' => 3,
       '#description' => t('Place a project within a subdirectory of sites/all/modules/contrib.'),
     ) + $base;
-    $element['location'] = array(
-      '#type' => 'textfield',
-      '#title' => t('location'),
-      '#default_value' => isset($items[$delta]['location']) ? 
-                          $items[$delta]['location'] : NULL,
-      '#weight' => 2,
-      '#description' => t('URL of an alternate project update XML server to '
-                        . 'use. Allows project XML data to be retrieved from '
-                        . 'sites other than `updates.drupal.org'),
-    ) + $base;
-    $element['type'] = array(
+    // Location 
+    $element['advanced_settings']['location_group'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'update location',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $element['advanced_settings']['location_group']['type'] = array(
       '#type' => 'textfield',
       '#title' => t('type'),
       '#default_value' => isset($items[$delta]['type']) ? 
-                          $items[$delta]['type'] : NULL,
-      '#weight' => 2,
-      '#description' => t('The project type. Must be provided if an update '
+                          $items[$delta]['type'] : 'module',
+      // @todo REPLACE WITH SELECT LIST
+      '#description' => t('REPLACE THIS WITH A SELECT LIST The project type. Must be provided if an update '
         . 'XML source is not specified and/or using version control or direct '
         . 'retrieval for a project. May be one of the following values: core, '
         . 'module, profile, theme.'),
     ) + $base;
-    $element['directory_name'] = array(
+    $element['advanced_settings']['location_group']['location'] = array(
+      '#type' => 'textfield',
+      '#title' => t('location'),
+      '#default_value' => isset($items[$delta]['location']) ? 
+                          $items[$delta]['location'] : NULL,
+      '#description' => t('URL of an alternate project update XML server to '
+                        . 'use. Allows project XML data to be retrieved from '
+                        . 'sites other than `updates.drupal.org'),
+    ) + $base;
+    $element['advanced_settings']['directory_name'] = array(
       '#type' => 'textfield',
       '#title' => t('directory_name'),
       '#default_value' => isset($items[$delta]['directory_name']) ? 
                           $items[$delta]['directory_name'] : NULL,
-      '#weight' => 2,
-      '#description' => t(' ADD DESCRIPTION HERE'),
+      '#description' => t('Provide an alternative directory name for this project. '
+                        . 'By default, the project name is used.'),
     ) + $base;
-    $element['l10n_url'] = array(
+    $element['advanced_settings']['l10n_url'] = array(
       '#type' => 'textfield',
       '#title' => t('l10n_url'),
       '#default_value' => isset($items[$delta]['l10n_url']) ? 
                           $items[$delta]['l10n_url'] : NULL,
-      '#weight' => 2,
-      '#description' => t(' ADD DESCRIPTION HERE'),
+      '#description' => t('URL to an l10n server XML info file. Allows translations ' 
+                    . 'to be retrieved from l10n servers other than localize.drupal.org.'),
     ) + $base;
-    $element['l10n_path'] = array(
+    $element['advanced_settings']['l10n_path'] = array(
       '#type' => 'textfield',
       '#title' => t('l10n_path'),
       '#default_value' => isset($items[$delta]['l10n_path']) ? 
                           $items[$delta]['l10n_path'] : NULL,
-      '#weight' => 2,
-      '#description' => t(' ADD DESCRIPTION HERE'),
+      '#description' => t('Specific URL (can include tokens) to a translation. Allows '
+        . 'translations to be retrieved from l10n servers other than localize.drupal.org.'),
     ) + $base;
-    $element['download_type'] = array(
+    $element['advanced_settings']['download_type'] = array(
       '#type' => 'textfield',
-      '#title' => t('download_type'),
+      '#title' => t('download_type MAKE THIS A SELECT LIST'), // @todo 
       '#default_value' => isset($items[$delta]['download_type']) ? 
                           $items[$delta]['download_type'] : NULL,
-      '#weight' => 2,
-      '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['download_url'] = array(
+    $element['advanced_settings']['download_url'] = array(
       '#type' => 'textfield',
       '#title' => t('download_url'),
       '#default_value' => isset($items[$delta]['download_url']) ? 
                           $items[$delta]['download_url'] : NULL,
-      '#weight' => 2,
-      '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['download_checksum_type'] = array(
+    $element['advanced_settings']['download_checksum_type'] = array(
       '#type' => 'textfield',
-      '#title' => t('download_checksum_type'),
+      '#title' => t('MAKE THIS A SELECT LIST download_checksum_type'), // @todo
       '#default_value' => isset($items[$delta]['download_checksum_type']) ? 
                           $items[$delta]['download_checksum_type'] : NULL,
-      '#weight' => 2,
-      '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['download_checksum_value'] = array(
+    $element['advanced_settings']['download_checksum_value'] = array(
       '#type' => 'textfield',
       '#title' => t('download_checksum_value'),
       '#default_value' => isset($items[$delta]['download_checksum_value']) ? 
                           $items[$delta]['download_checksum_value'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['request_type'] = array(
-      '#type' => 'textfield',
-      '#title' => t('request_type'),
+    $element['advanced_settings']['request_type'] = array(
+      '#type' => 'textfield', //@todo select list
+      '#title' => t('request_type'), 
       '#default_value' => isset($items[$delta]['request_type']) ? 
                           $items[$delta]['request_type'] : NULL,
-      '#weight' => 2,
-      '#description' => t(' ADD DESCRIPTION HERE'),
+      '#description' => t('post or get'),
     ) + $base;
-    $element['data'] = array(
+    $element['advanced_settings']['data'] = array(
       '#type' => 'textfield',
       '#title' => t('data'),
       '#default_value' => isset($items[$delta]['data']) ? 
                           $items[$delta]['data'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['filename'] = array(
+    $element['advanced_settings']['filename'] = array(
       '#type' => 'textfield',
       '#title' => t('filename'),
       '#default_value' => isset($items[$delta]['filename']) ? 
                           $items[$delta]['filename'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['date'] = array(
+    $element['advanced_settings']['date'] = array(
       '#type' => 'textfield',
       '#title' => t('date'),
       '#default_value' => isset($items[$delta]['date']) ? 
                           $items[$delta]['date'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['root'] = array(
+    $element['advanced_settings']['root'] = array(
       '#type' => 'textfield',
       '#title' => t('root'),
       '#default_value' => isset($items[$delta]['root']) ? 
                           $items[$delta]['root'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['module'] = array(
+    $element['advanced_settings']['module'] = array(
       '#type' => 'textfield',
       '#title' => t('module'),
       '#default_value' => isset($items[$delta]['module']) ? 
                           $items[$delta]['module'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['revision'] = array(
+    $element['advanced_settings']['revision'] = array(
       '#type' => 'textfield',
       '#title' => t('revision'),
       '#default_value' => isset($items[$delta]['revision']) ? 
                           $items[$delta]['revision'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['branch'] = array(
+    $element['advanced_settings']['branch'] = array(
       '#type' => 'textfield',
       '#title' => t('branch'),
       '#default_value' => isset($items[$delta]['branch']) ? 
                           $items[$delta]['branch'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['tag'] = array(
+    $element['advanced_settings']['tag'] = array(
       '#type' => 'textfield',
       '#title' => t('tag'),
       '#default_value' => isset($items[$delta]['tag']) ? 
                           $items[$delta]['tag'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['interactive'] = array(
+    $element['advanced_settings']['interactive'] = array(
       '#type' => 'textfield',
       '#title' => t('interactive'),
       '#default_value' => isset($items[$delta]['interactive']) ? 
                           $items[$delta]['interactive'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['username'] = array(
+    $element['advanced_settings']['username'] = array(
       '#type' => 'textfield',
       '#title' => t('username'),
       '#default_value' => isset($items[$delta]['username']) ? 
                           $items[$delta]['username'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['password'] = array(
+    $element['advanced_settings']['password'] = array(
       '#type' => 'textfield',
       '#title' => t('password'),
       '#default_value' => isset($items[$delta]['password']) ? 
                           $items[$delta]['password'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['patch_url'] = array(
+    $element['advanced_settings']['patch_url'] = array(
       '#type' => 'textfield',
       '#title' => t('patch_url'),
       '#default_value' => isset($items[$delta]['patch_url']) ? 
                           $items[$delta]['patch_url'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['patch_md5'] = array(
+    $element['advanced_settings']['patch_md5'] = array(
       '#type' => 'textfield',
       '#title' => t('patch_md5'),
       '#default_value' => isset($items[$delta]['patch_md5']) ? 
                           $items[$delta]['patch_md5'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['library_destination'] = array(
+    $element['advanced_settings']['library_destination'] = array(
       '#type' => 'textfield',
       '#title' => t('library_destination'),
       '#default_value' => isset($items[$delta]['library_destination']) ? 
                           $items[$delta]['library_destination'] : NULL,
-      '#weight' => 2,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
 
@@ -555,7 +552,6 @@ function makefield_field_formatter_info() {
 function makefield_field_formatter_view($obj_type, $object, $field, 
                                            $instance, $langcode, $items, 
                                            $display) { 
-
 /*
 dsm($obj_type, 'obj_type');
 dsm($object, 'object');
@@ -568,15 +564,9 @@ dsm($items,'items');
 
   $elements = array();
   foreach ($items as $delta => $item) {
-  /*
-    // TODO add preprocessing here? 
-    $url = url($item['url']);
-    $text = "[video:$url]";
-  // */
-
     $elements[$delta] = array(
       '#theme' => 'makefield_default_formatter',
-      '#item' => check_plain($item),
+      '#item' => $item,
     );
   }
 
@@ -599,7 +589,13 @@ function makefield_theme() {
  * Returns HTML for a makefield_formatter
  */
 function theme_makefield_default_formatter($variables) {
+  $item = $variables['item'];
+dsm($item, 'item');
   $output = '<div class="makefield">' . $variables['item'] . '</div>';
 
   return $output;
 }
+
+/**
+ * TODO Take array and turn it into a make-style project.
+ */
