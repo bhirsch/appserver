@@ -10,9 +10,3 @@ files[] = field_group.field_ui.inc
 files[] = field_group.form.inc
 files[] = field_group.features.inc
 files[] = field_group.test
-; Information added by drupal.org packaging script on 2011-03-16
-version = "7.x-1.0-rc2"
-core = "7.x"
-project = "field_group"
-datestamp = "1300283167"
-
