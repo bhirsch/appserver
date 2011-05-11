@@ -332,9 +332,10 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
     // File directory.
     $element['advanced_settings']['directory_group'] = array(
       '#type' => 'fieldset',
-      '#title' => 'file directory',
+      '#title' => 'File Directory',
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
+      '#weight' => 5,
     );
     $element['advanced_settings']['directory_group']['subdir'] = array(
       '#type' => 'textfield',
@@ -357,6 +358,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#title' => t('update location'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
+      '#weight' => 10,
     );
     $element['advanced_settings']['location_group']['type'] = array(
       '#type' => 'select',
@@ -389,6 +391,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#title' => t('Translation'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
+      '#weight' => 15,
     );
     $element['advanced_settings']['translation_group']['l10n_url'] = array(
       '#type' => 'textfield',
@@ -411,6 +414,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#title' => t('Download Settings'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
+      '#weight' => 0,
     );
     $element['advanced_settings']['download_settings']['download_type'] = array(
       '#type' => 'select',
@@ -425,12 +429,14 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       ),
       '#default_value' => isset($items[$delta]['download_type']) ? 
                           $items[$delta]['download_type'] : NULL,
+      '#weight' => 0,
     ) + $base;
     $element['advanced_settings']['download_settings']['download_url'] = array(
       '#type' => 'textfield',
       '#title' => t('Download URL'),
       '#default_value' => isset($items[$delta]['download_url']) ? 
                           $items[$delta]['download_url'] : NULL,
+      '#weight' => 0,
     ) + $base;
     $element['advanced_settings']['download_settings']['download_checksum_type'] = array(
       '#type' => 'select',
@@ -547,6 +553,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#title' => t('Patch'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
+      '#weight' => 20,
     );
     $element['advanced_settings']['patch_group']['patch_url'] = array(
       '#type' => 'textfield',
@@ -567,6 +574,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#title' => t('Library Destination'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
+      '#weight' => 25,
     );
     $element['advanced_settings']['library_group']['library_destination'] = array(
       '#type' => 'textfield',
