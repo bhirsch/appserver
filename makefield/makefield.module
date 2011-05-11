@@ -364,6 +364,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#default_value' => isset($items[$delta]['type']) ? 
                           $items[$delta]['type'] : NULL,
       '#options' => array(
+        '' => t('<none>'),
         'core' => t('core'),
         'module' => t('module'), 
         'profile' => t('profile'), 
@@ -415,6 +416,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#type' => 'select',
       '#title' => t('Download Type'), 
       '#options' => array(
+        '' => t('<none>'),
         'file' => t('file'),
         'git' => t('git'),
         'svn' => t('svn'),
@@ -436,6 +438,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#default_value' => isset($items[$delta]['download_checksum_type']) ? 
                           $items[$delta]['download_checksum_type'] : NULL,
       '#options' => array(
+        '' => '<none>',
         'md5' => 'md5',
         'sha1' => 'sha1',
         'sha256' => 'sha256',
@@ -456,6 +459,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
                           $items[$delta]['request_type'] : NULL,
       '#description' => t(''),
       '#options' => array(
+        '' => t('<none>'), 
         'get' => t('get'), 
         'post' => t('post')
       ),
