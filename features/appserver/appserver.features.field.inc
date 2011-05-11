@@ -73,7 +73,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '8',
+        'weight' => '6',
       ),
     ),
   );
@@ -141,7 +141,7 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '9',
+        'weight' => '7',
       ),
     ),
   );
@@ -276,7 +276,79 @@ function appserver_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '4',
+        'weight' => '5',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-app-field_app_files'
+  $fields['node-app-field_app_files'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '-1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_app_files',
+      'foreign keys' => array(
+        'fid' => array(
+          'columns' => array(
+            'fid' => 'fid',
+          ),
+          'table' => 'file_managed',
+        ),
+      ),
+      'indexes' => array(
+        'fid' => array(
+          0 => 'fid',
+        ),
+      ),
+      'module' => 'file',
+      'settings' => array(
+        'display_default' => 0,
+        'display_field' => 0,
+        'uri_scheme' => 'public',
+      ),
+      'translatable' => '1',
+      'type' => 'file',
+    ),
+    'field_instance' => array(
+      'bundle' => 'app',
+      'deleted' => '0',
+      'description' => 'Upload Drupal projects or patches that are not hosted elsewhere.',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'file',
+          'settings' => array(),
+          'type' => 'file_default',
+          'weight' => 19,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_app_files',
+      'label' => 'Additional Files',
+      'required' => 0,
+      'settings' => array(
+        'description_field' => 0,
+        'file_directory' => 'app_uploads',
+        'file_extensions' => 'txt zip tar tgz gz',
+        'max_filesize' => '',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'file',
+        'settings' => array(
+          'progress_indicator' => 'throbber',
+        ),
+        'type' => 'file_generic',
+        'weight' => '8',
       ),
     ),
   );
@@ -354,7 +426,7 @@ function appserver_field_default_fields() {
           'progress_indicator' => 'throbber',
         ),
         'type' => 'image_image',
-        'weight' => '10',
+        'weight' => '6',
       ),
     ),
   );
@@ -451,38 +523,7 @@ function appserver_field_default_fields() {
     ),
     'field_instance' => array(
       'bundle' => 'app',
-      'default_value' => array(
-        0 => array(
-          'branch' => '',
-          'data' => '',
-          'date' => '',
-          'directory_name' => '',
-          'download_checksum_type' => '',
-          'download_checksum_value' => '',
-          'download_type' => '',
-          'download_url' => '',
-          'filename' => '',
-          'interactive' => '',
-          'l10n_path' => '',
-          'l10n_url' => '',
-          'library_destination' => '',
-          'location' => '',
-          'module' => '',
-          'name' => '',
-          'password' => '',
-          'patch_md5' => '',
-          'patch_url' => '',
-          'project_type' => 'project',
-          'request_type' => '',
-          'revision' => '',
-          'root' => '',
-          'subdir' => '',
-          'tag' => '',
-          'type' => '',
-          'username' => '',
-          'version' => '',
-        ),
-      ),
+      'default_value' => NULL,
       'deleted' => '0',
       'description' => '',
       'display' => array(
@@ -512,7 +553,7 @@ function appserver_field_default_fields() {
         'module' => 'makefield',
         'settings' => array(),
         'type' => 'makefield',
-        'weight' => '19',
+        'weight' => '10',
       ),
     ),
   );
@@ -590,7 +631,7 @@ function appserver_field_default_fields() {
           'progress_indicator' => 'throbber',
         ),
         'type' => 'image_image',
-        'weight' => '18',
+        'weight' => '7',
       ),
     ),
   );
@@ -665,6 +706,7 @@ function appserver_field_default_fields() {
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('Additional Files');
   t('App Version');
   t('Author');
   t('Author\'s Website');
@@ -674,6 +716,7 @@ function appserver_field_default_fields() {
   t('Logo');
   t('Machine Name');
   t('Screen Shots');
+  t('Upload Drupal projects or patches that are not hosted elsewhere.');
 
   return $fields;
 }
