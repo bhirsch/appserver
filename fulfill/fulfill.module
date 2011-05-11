@@ -1,0 +1,29 @@
+<?php
+
+function fulfill_menu() {
+  $items['fulfill'] = array(
+    'title' => 'Fulfill an order',
+    'page callback' => 'fulfill_fulfill',
+    'access arguments' => array('fulfill order'), // Give this to everyone I think
+  );
+  return $items;
+}
+
+function fulfill_permission() {
+  return array(
+    'fulfill order' => array(
+      'title' => t('Fulfill order'),
+    ),
+  );
+}
+
+function fulfill_fulfill() {
+  $post = json_decode($GLOBALS['HTTP_RAW_POST_DATA']);
+  fulfill_transfer();
+}
+
+function fulfill_transfer() {
+  $uri = 'temporary://channel.xml.zip';
+  $headers = array('Content-Type' => 'application/zip');
+  file_transfer($uri, $headers);
+}
