@@ -134,6 +134,7 @@ function makefield_makify($components) {
       }
     }
   }
+  $output .= "\n";
 
   return $output;
 }
