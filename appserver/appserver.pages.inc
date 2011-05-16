@@ -76,41 +76,46 @@ function appserver_listview_page() {
   //@todo Create a custom view mode
   // $view_mode = 'app_catalog';
   //$build = node_view_multiple($nodes, $view_mode);
-//$build = node_view_multiple($nodes);
-//dsm($build, 'build');
+  $build_nodes = node_view_multiple($nodes);
 
   // Build a jquerymobile render array including a
   // a pages array, page arrays, and listview array.
   $pages = array();
   // The first jquerymobile page is an unordered list, (data-role=listview).
   $pages[0] = array(
-    //'#theme' => 'jquerymobile_page',
+    '#theme' => 'jquerymobile_page',
     'id' => 'catalog',
-    'contents' => array(
+    'header' => t('Apps'),
+    'content' => array(
       '#theme' => 'jquerymobile_listview',  
       'items' => array(),
     ),
   );
   // Each app node gets a list item and a dedicated jquerymobile page.
-  foreach ($nodes as $node) {
-    $id = 'app-' . $node->nid;
-    // List item: 
-    $pages[0]['contents']['items'][] = array(
-      'node' => $node,
-      'link to' => $id,
-    );
-    // Dedicated jquerymobile page: 
-    $content = array(
-     // '#theme' => 'jquerymobile_page',
-      'node' => $node,  
-    );
-    $pages[] = $content;
+  foreach ($build_nodes['nodes'] as $build_node) {
+    if ($node = $build_node['#node']) {
+      $id = 'app-' . $node->nid;
+      // List item: 
+      $pages[0]['content']['items'][] = array(
+        'node' => $node,
+        'link to' => '#' . $id,
+      );
+      // Dedicated jquerymobile page: 
+      $pages[] = array(
+        '#theme' => 'jquerymobile_page',
+        'id' => $id, 
+        'header' => check_plain($node->title),
+        'content' => $build_node
+      );
+    }
   }
   $build = array(
     '#theme' => 'jquerymobile_pages',
     'pages' => $pages,
   );
-dsm($build, 'jquery build');
 
-  return $build;
+  // @todo Fix render array and return $build rather than themed html output.
+  //return $build;
+  $output = theme('jquerymobile_pages', array('pages' => $pages));
+  return $output;
 }
