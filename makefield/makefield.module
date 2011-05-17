@@ -441,20 +441,38 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
         'git' => t('git'),
         'svn' => t('svn'),
         'bzr' => t('bazaar'),
-        'csv' => t('cvs'),
+        'cvs' => t('cvs'),
       ),
       '#default_value' => isset($items[$delta]['download_type']) ? 
                           $items[$delta]['download_type'] : NULL,
-      '#weight' => 0,
+      '#weight' => -10,
     ) + $base;
-    $element['advanced_settings']['download_settings']['download_url'] = array(
+    // Download Settings: All
+    $element['advanced_settings']['download_settings']['all'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'invisible' => array(
+          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => ''),
+        ),
+      ),
+      '#weight' => -9,
+    );
+    $element['advanced_settings']['download_settings']['all']['download_url'] = array(
       '#type' => 'textfield',
       '#title' => t('Download URL'),
       '#default_value' => isset($items[$delta]['download_url']) ? 
                           $items[$delta]['download_url'] : NULL,
-      '#weight' => 0,
     ) + $base;
-    $element['advanced_settings']['download_settings']['download_checksum_type'] = array(
+    // Download Settings: File
+    $element['advanced_settings']['download_settings']['file'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'file'),
+        ),
+      ),
+    );
+    $element['advanced_settings']['download_settings']['file']['download_checksum_type'] = array(
       '#type' => 'select',
       '#title' => t('Checksum Type'),  
       '#default_value' => isset($items[$delta]['download_checksum_type']) ? 
@@ -467,14 +485,14 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
         'sha512' => 'sha512',
       ),
     ) + $base;
-    $element['advanced_settings']['download_settings']['download_checksum_value'] = array(
+    $element['advanced_settings']['download_settings']['file']['download_checksum_value'] = array(
       '#type' => 'textfield',
       '#title' => t('Checksum Value'),
       '#default_value' => isset($items[$delta]['download_checksum_value']) ? 
                           $items[$delta]['download_checksum_value'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['request_type'] = array(
+    $element['advanced_settings']['download_settings']['file']['request_type'] = array(
       '#type' => 'select',
       '#title' => t('request_type'), 
       '#default_value' => isset($items[$delta]['request_type']) ? 
@@ -486,83 +504,125 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
         'post' => t('post')
       ),
     ) + $base;
-    $element['advanced_settings']['download_settings']['data'] = array(
+    $element['advanced_settings']['download_settings']['file']['data'] = array(
       '#type' => 'textfield',
       '#title' => t('data'),
       '#default_value' => isset($items[$delta]['data']) ? 
                           $items[$delta]['data'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['filename'] = array(
+    $element['advanced_settings']['download_settings']['file']['filename'] = array(
       '#type' => 'textfield',
       '#title' => t('filename'),
       '#default_value' => isset($items[$delta]['filename']) ? 
                           $items[$delta]['filename'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['date'] = array(
+        
+    // Download settings: bzr
+    // Note: As of drush_make v 2.0 there bzr doesn't have any special parameters.
+    $element['advanced_settings']['download_settings']['bzr'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'bzr'),
+        ),
+      ),
+    );
+
+    // Download settings: cvs
+    $element['advanced_settings']['download_settings']['cvs'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'cvs'),
+        ),
+      ),
+    );
+    $element['advanced_settings']['download_settings']['cvs']['date'] = array(
       '#type' => 'textfield',
       '#title' => t('date'),
       '#default_value' => isset($items[$delta]['date']) ? 
                           $items[$delta]['date'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['root'] = array(
+    $element['advanced_settings']['download_settings']['cvs']['root'] = array(
       '#type' => 'textfield',
       '#title' => t('root'),
       '#default_value' => isset($items[$delta]['root']) ? 
                           $items[$delta]['root'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['module'] = array(
+    $element['advanced_settings']['download_settings']['cvs']['module'] = array(
       '#type' => 'textfield',
       '#title' => t('module'),
       '#default_value' => isset($items[$delta]['module']) ? 
                           $items[$delta]['module'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['revision'] = array(
+    $element['advanced_settings']['download_settings']['cvs']['revision'] = array(
       '#type' => 'textfield',
       '#title' => t('revision'),
       '#default_value' => isset($items[$delta]['revision']) ? 
                           $items[$delta]['revision'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['branch'] = array(
+
+    // Download settings: git
+    $element['advanced_settings']['download_settings']['git'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'git'),
+        ),
+      ),
+    );
+    $element['advanced_settings']['download_settings']['git']['branch'] = array(
       '#type' => 'textfield',
       '#title' => t('branch'),
       '#default_value' => isset($items[$delta]['branch']) ? 
                           $items[$delta]['branch'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['tag'] = array(
+    $element['advanced_settings']['download_settings']['git']['tag'] = array(
       '#type' => 'textfield',
       '#title' => t('tag'),
       '#default_value' => isset($items[$delta]['tag']) ? 
                           $items[$delta]['tag'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['interactive'] = array(
+
+    // Download settings: svn
+    $element['advanced_settings']['download_settings']['svn'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'svn'),
+        ),
+      ),
+    );
+    $element['advanced_settings']['download_settings']['svn']['interactive'] = array(
       '#type' => 'textfield',
       '#title' => t('interactive'),
       '#default_value' => isset($items[$delta]['interactive']) ? 
                           $items[$delta]['interactive'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['username'] = array(
+    $element['advanced_settings']['download_settings']['svn']['username'] = array(
       '#type' => 'textfield',
       '#title' => t('username'),
       '#default_value' => isset($items[$delta]['username']) ? 
                           $items[$delta]['username'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
-    $element['advanced_settings']['download_settings']['password'] = array(
+    $element['advanced_settings']['download_settings']['svn']['password'] = array(
       '#type' => 'textfield',
       '#title' => t('password'),
       '#default_value' => isset($items[$delta]['password']) ? 
                           $items[$delta]['password'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
+
     // Patches
     $element['advanced_settings']['patch_group'] = array(
       '#type' => 'fieldset',
