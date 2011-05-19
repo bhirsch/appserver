@@ -139,6 +139,7 @@ function makefield_field_schema($field) {
       'not null' => FALSE,
     );
     // cvs only: 
+    /*
     $schema['columns']['date'] = array(
       'type' => 'varchar',
       'length' => 255,
@@ -154,6 +155,7 @@ function makefield_field_schema($field) {
       'length' => 255,
       'not null' => FALSE,
     );
+    // */
     // git and cvs: 
     $schema['columns']['revision'] = array(
       'type' => 'varchar',
@@ -259,8 +261,25 @@ function makefield_field_presave($entity_type, $entity, $field, $instance, $lang
       $new_values[$delta]['version'] = $item['version'];
       $new_values[$delta]['project_type'] = $item['project_type'];
       // Additional components (advanced settings).
-      foreach ($item['advanced_settings'] as $settings_group){
+      //foreach ($item['advanced_settings'] as $settings_group){
+      foreach ($item['advanced_settings'] as $group_name => $settings_group){
+        // To get the makefield values get saved correctly, the $items
+        // array has to look like this: 
+        // $items[$delta][$component] = $value;
+        // Build up $new_values array like this, then set $items = $new_values.
         foreach ($settings_group as $component => $value) {
+          // Git and Bazaar both use tags. The form actually stores two tag values,
+          // one for each. Only save the one corresponding to the download type
+          // selected.
+          if ($component == 'download_type') {
+            $download_type = $value;
+          }
+          if ($group_name == 'download_settings' && is_array($value)
+            && ($component == 'all' || $component == $download_type)) {
+            foreach ($value as $component => $value) {
+              $new_values[$delta][$component] = $value;
+            }
+          }
           $new_values[$delta][$component] = $value;
         }
       }
@@ -272,6 +291,7 @@ function makefield_field_presave($entity_type, $entity, $field, $instance, $lang
 /**
  * Implements hook_field_validate().
  */
+/*
 function makefield_field_validate($obj_type, $object, $field,
                                            $instance, $langcode, &$items,
                                            &$errors) {
@@ -279,7 +299,7 @@ function makefield_field_validate($obj_type, $object, $field,
     // @todo add validation
   }  
 }
-
+// */
 
 /**
  * Implements hook_field_widget_info().
@@ -441,12 +461,13 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
         'git' => t('git'),
         'svn' => t('svn'),
         'bzr' => t('bazaar'),
-        'cvs' => t('cvs'),
+        //'cvs' => t('cvs'),
       ),
       '#default_value' => isset($items[$delta]['download_type']) ? 
                           $items[$delta]['download_type'] : NULL,
       '#weight' => -10,
     ) + $base;
+
     // Download Settings: All
     $element['advanced_settings']['download_settings']['all'] = array(
       '#type' => 'container',
@@ -463,6 +484,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#default_value' => isset($items[$delta]['download_url']) ? 
                           $items[$delta]['download_url'] : NULL,
     ) + $base;
+
     // Download Settings: File
     $element['advanced_settings']['download_settings']['file'] = array(
       '#type' => 'container',
@@ -472,6 +494,48 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
         ),
       ),
     );
+    $weight = 0;
+    $element['advanced_settings']['download_settings']['file']['filename'] = array(
+      '#type' => 'textfield',
+      '#title' => t('File Name'),
+      '#default_value' => isset($items[$delta]['filename']) ? 
+                          $items[$delta]['filename'] : NULL,
+      '#description' => t("Optional. What to name the file, if it's not an archive."),
+      '#weight' => $weight,
+    ) + $base;
+    $weight++;
+    $element['advanced_settings']['download_settings']['file']['request_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Request Type'), 
+      '#default_value' => isset($items[$delta]['request_type']) ? 
+                          $items[$delta]['request_type'] : NULL,
+      '#description' => t(''),
+      '#options' => array(
+        // get is used by default. This only needs to be written explicitly
+        // in the .make file if the user selects post.
+        '' => t('get'), 
+        //'get' => t('get'), 
+        'post' => t('post')
+      ),
+      '#weight' => $weight,
+    ) + $base;
+    $weight++;
+    $element['advanced_settings']['download_settings']['file']['data'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Post Data'),
+      '#default_value' => isset($items[$delta]['data']) ? 
+                          $items[$delta]['data'] : NULL,
+      '#description' => t('Required. The post data to be submitted with the request. ' 
+                        . 'Should be a valid URL query string.'),
+      '#weight' => $weight,
+      '#states' => array(
+        // This setting is only relevant if user selects request_type = post.
+        'invisible' => array(
+          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][file][request_type]"]' => array('value' => ''),
+        ),
+      ),
+    ) + $base;
+    $weight++;
     $element['advanced_settings']['download_settings']['file']['download_checksum_type'] = array(
       '#type' => 'select',
       '#title' => t('Checksum Type'),  
@@ -484,40 +548,24 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
         'sha256' => 'sha256',
         'sha512' => 'sha512',
       ),
+      '#description' => t('Optional checksum to verify integrity of downloaded file.'),
+      '#weight' => $weight,
     ) + $base;
+    $weight++;
     $element['advanced_settings']['download_settings']['file']['download_checksum_value'] = array(
       '#type' => 'textfield',
       '#title' => t('Checksum Value'),
       '#default_value' => isset($items[$delta]['download_checksum_value']) ? 
                           $items[$delta]['download_checksum_value'] : NULL,
-      '#description' => t(' ADD DESCRIPTION HERE'),
-    ) + $base;
-    $element['advanced_settings']['download_settings']['file']['request_type'] = array(
-      '#type' => 'select',
-      '#title' => t('request_type'), 
-      '#default_value' => isset($items[$delta]['request_type']) ? 
-                          $items[$delta]['request_type'] : NULL,
-      '#description' => t(''),
-      '#options' => array(
-        '' => t('<none>'), 
-        'get' => t('get'), 
-        'post' => t('post')
+      '#description' => t('Checksum value'),
+      '#states' => array(
+        'invisible' => array(
+          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][file][download_checksum_type]"]' => array('value' => ''),
+        ),
       ),
+      '#weight' => $weight,
     ) + $base;
-    $element['advanced_settings']['download_settings']['file']['data'] = array(
-      '#type' => 'textfield',
-      '#title' => t('data'),
-      '#default_value' => isset($items[$delta]['data']) ? 
-                          $items[$delta]['data'] : NULL,
-      '#description' => t(' ADD DESCRIPTION HERE'),
-    ) + $base;
-    $element['advanced_settings']['download_settings']['file']['filename'] = array(
-      '#type' => 'textfield',
-      '#title' => t('filename'),
-      '#default_value' => isset($items[$delta]['filename']) ? 
-                          $items[$delta]['filename'] : NULL,
-      '#description' => t(' ADD DESCRIPTION HERE'),
-    ) + $base;
+    $weight++;
         
     // Download settings: bzr
     // Note: As of drush_make v 2.0 there bzr doesn't have any special parameters.
@@ -529,8 +577,16 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
         ),
       ),
     );
+    $element['advanced_settings']['download_settings']['bzr']['tag'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Tag'),
+      '#default_value' => isset($items[$delta]['tag']) ? 
+                          $items[$delta]['tag'] : NULL,
+      '#description' => t('Optional. Tag to checkout.'),
+    ) + $base;
 
     // Download settings: cvs
+    /*
     $element['advanced_settings']['download_settings']['cvs'] = array(
       '#type' => 'container',
       '#states' => array(
@@ -567,6 +623,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
                           $items[$delta]['revision'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
+    // */
 
     // Download settings: git
     $element['advanced_settings']['download_settings']['git'] = array(
@@ -577,20 +634,22 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
         ),
       ),
     );
-    $element['advanced_settings']['download_settings']['git']['branch'] = array(
-      '#type' => 'textfield',
-      '#title' => t('branch'),
-      '#default_value' => isset($items[$delta]['branch']) ? 
-                          $items[$delta]['branch'] : NULL,
-      '#description' => t(' ADD DESCRIPTION HERE'),
-    ) + $base;
     $element['advanced_settings']['download_settings']['git']['tag'] = array(
       '#type' => 'textfield',
-      '#title' => t('tag'),
+      '#title' => t('Tag'),
       '#default_value' => isset($items[$delta]['tag']) ? 
                           $items[$delta]['tag'] : NULL,
-      '#description' => t(' ADD DESCRIPTION HERE'),
+      '#description' => t('Optional. Tag to checkout.'),
     ) + $base;
+    /*
+    $element['advanced_settings']['download_settings']['git']['branch'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Branch'),
+      '#default_value' => isset($items[$delta]['branch']) ? 
+                          $items[$delta]['branch'] : NULL,
+      '#description' => t('Optional. Branch to checkout.'),
+    ) + $base;
+    // */
 
     // Download settings: svn
     $element['advanced_settings']['download_settings']['svn'] = array(
@@ -601,17 +660,20 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
         ),
       ),
     );
+    /*
     $element['advanced_settings']['download_settings']['svn']['interactive'] = array(
       '#type' => 'textfield',
-      '#title' => t('interactive'),
+      '#title' => t('Interactive'),
       '#default_value' => isset($items[$delta]['interactive']) ? 
                           $items[$delta]['interactive'] : NULL,
-      '#description' => t(' ADD DESCRIPTION HERE'),
+      '#description' => t('Whether to prompt the user for authentication '
+                        . 'credentials when using a private repository. Allows '
+                        . 'username and/or password options to be omitted.'),
     ) + $base;
     $element['advanced_settings']['download_settings']['svn']['username'] = array(
       '#type' => 'textfield',
       '#title' => t('username'),
-      '#default_value' => isset($items[$delta]['username']) ? 
+      '#default_value' => isset($items[$delta]['Username']) ? 
                           $items[$delta]['username'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
@@ -622,6 +684,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
                           $items[$delta]['password'] : NULL,
       '#description' => t(' ADD DESCRIPTION HERE'),
     ) + $base;
+    // */
 
     // Patches
     $element['advanced_settings']['patch_group'] = array(
