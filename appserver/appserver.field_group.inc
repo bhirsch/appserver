@@ -20,7 +20,7 @@ function appserver_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Author Info',
-    'weight' => '5',
+    'weight' => '6',
     'children' => array(
       0 => 'field_app_author',
       1 => 'field_app_author_url',
@@ -48,7 +48,7 @@ function appserver_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Components',
-    'weight' => '9',
+    'weight' => '8',
     'children' => array(
       0 => 'field_app_makefield',
     ),
@@ -75,7 +75,7 @@ function appserver_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Recommended Distributions',
-    'weight' => '4',
+    'weight' => '5',
     'children' => array(
       0 => 'field_app_distro',
     ),
@@ -102,11 +102,11 @@ function appserver_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Uploads (Attached Files)',
-    'weight' => '8',
+    'weight' => '7',
     'children' => array(
-      0 => 'field_app_logo',
-      1 => 'field_app_screenshots',
-      2 => 'field_app_files',
+      0 => 'field_app_files',
+      1 => 'field_app_logo',
+      2 => 'field_app_screenshots',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
