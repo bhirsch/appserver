@@ -325,8 +325,6 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
                                         $instance, $langcode, $items,
                                         $delta, $element) {
   $base = $element;   
-  //dsm($element);
-  //dsm($instance,' instance');
   
   if ($instance['widget']['type'] == 'makefield') {
     $element['name'] = array(
@@ -469,11 +467,12 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
     ) + $base;
 
     // Download Settings: All
+    $download_type_selection = 'select[name="field_app_makefield[und][' . $delta . '][advanced_settings][download_settings][download_type]"]';
     $element['advanced_settings']['download_settings']['all'] = array(
       '#type' => 'container',
       '#states' => array(
         'invisible' => array(
-          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => ''),
+          $download_type_selection => array('value' => ''),
         ),
       ),
       '#weight' => -9,
@@ -490,7 +489,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#type' => 'container',
       '#states' => array(
         'visible' => array(
-          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'file'),
+          $download_type_selection => array('value' => 'file'),
         ),
       ),
     );
@@ -520,6 +519,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#weight' => $weight,
     ) + $base;
     $weight++;
+    $request_type_selection = 'select[name="field_app_makefield[und][' . $delta .'][advanced_settings][download_settings][file][request_type]"]';
     $element['advanced_settings']['download_settings']['file']['data'] = array(
       '#type' => 'textfield',
       '#title' => t('Post Data'),
@@ -531,7 +531,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#states' => array(
         // This setting is only relevant if user selects request_type = post.
         'invisible' => array(
-          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][file][request_type]"]' => array('value' => ''),
+           $request_type_selection => array('value' => ''),
         ),
       ),
     ) + $base;
@@ -552,6 +552,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#weight' => $weight,
     ) + $base;
     $weight++;
+    $checksum_type_selection = 'select[name="field_app_makefield[und][0][advanced_settings][download_settings][file][download_checksum_type]"]';
     $element['advanced_settings']['download_settings']['file']['download_checksum_value'] = array(
       '#type' => 'textfield',
       '#title' => t('Checksum Value'),
@@ -560,7 +561,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#description' => t('Checksum value'),
       '#states' => array(
         'invisible' => array(
-          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][file][download_checksum_type]"]' => array('value' => ''),
+           $checksum_type_selection => array('value' => ''),
         ),
       ),
       '#weight' => $weight,
@@ -573,7 +574,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#type' => 'container',
       '#states' => array(
         'visible' => array(
-          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'bzr'),
+          $download_type_selection  => array('value' => 'bzr'),
         ),
       ),
     );
@@ -630,7 +631,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#type' => 'container',
       '#states' => array(
         'visible' => array(
-          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'git'),
+          $download_type_selection => array('value' => 'git'),
         ),
       ),
     );
@@ -656,7 +657,7 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#type' => 'container',
       '#states' => array(
         'visible' => array(
-          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'svn'),
+          $download_type_selection => array('value' => 'svn'),
         ),
       ),
     );
