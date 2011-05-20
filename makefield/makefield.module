@@ -394,23 +394,6 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#collapsed' => TRUE,
       '#weight' => 10,
     );
-    $element['advanced_settings']['location_group']['type'] = array(
-      '#type' => 'select',
-      '#title' => t('Type'),
-      '#default_value' => isset($items[$delta]['type']) ? 
-                          $items[$delta]['type'] : NULL,
-      '#options' => array(
-        '' => t('<none>'),
-        'core' => t('core'),
-        'module' => t('module'), 
-        'profile' => t('profile'), 
-        'theme' => t('theme')
-      ),
-      '#description' => t('The project type. Must be provided if an update '
-        . 'XML source is not specified and/or using version control or direct '
-        . 'retrieval for a project. May be one of the following values: core, '
-        . 'module, profile, theme.'),
-    ) + $base;
     $element['advanced_settings']['location_group']['location'] = array(
       '#type' => 'textfield',
       '#title' => t('location'),
@@ -443,6 +426,8 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       '#description' => t('Specific URL (can include tokens) to a translation. Allows '
         . 'translations to be retrieved from l10n servers other than localize.drupal.org.'),
     ) + $base;
+
+    // Download Settings
     $element['advanced_settings']['download_settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Download Settings'),
@@ -477,6 +462,30 @@ function makefield_field_widget_form(&$form, &$form_state, $field,
       ),
       '#weight' => -9,
     );
+    $project_type_selection = 'select[name="field_app_makefield[und][' . $delta . '][project_type]"]';
+    $element['advanced_settings']['download_settings']['all']['type'] = array(
+      '#type' => 'select',
+      '#title' => t('Drupal Project Type'),
+      '#default_value' => isset($items[$delta]['type']) ? 
+                          $items[$delta]['type'] : NULL,
+      '#options' => array(
+        '' => t('<none>'),
+        'core' => t('core'),
+        'module' => t('module'), 
+        'profile' => t('profile'), 
+        'theme' => t('theme')
+      ),
+      '#states' => array(
+        'invisible' => array(
+          $project_type_selection => array('value' => 'library'),
+        ),
+      ),
+      '#description' => t('Type of project. Must be provided if an update '
+        . 'XML source is not specified and/or using version control or direct '
+        . 'retrieval for a project. May be one of the following values: core, '
+        . 'module, profile, theme.'),
+      '#weight' => -8,
+    ) + $base;
     $element['advanced_settings']['download_settings']['all']['download_url'] = array(
       '#type' => 'textfield',
       '#title' => t('Download URL'),
