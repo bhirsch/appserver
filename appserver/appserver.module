@@ -28,3 +28,25 @@ function appserver_menu() {
   return $items;
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function appserver_form_app_node_form_alter(&$form, &$form_state, $form_id) {
+  $form['#submit'][] = 'appserver_make_app';
+dsm($form, 'Note: appserver_make_app is being called on submit. This is just for development.');
+}
+
+/**
+ * Wrapper for _appserver_make_app() in appserver.make.inc.
+ */
+function appserver_make_app() {
+  $arg1 = arg(1);
+  if ($arg1 == 'add') {
+    dsm('appserver_make_app only runs when saving existing nodes. temp. This may only run on submit for development anyway.');
+  }
+  else if (is_numeric($arg1)) {
+    // $arg1 is a node id.
+    module_load_include('inc', 'appserver', 'appserver.make');
+    _appserver_make_app($arg1); 
+  }
+}

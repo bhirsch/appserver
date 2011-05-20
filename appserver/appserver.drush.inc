@@ -23,13 +23,22 @@
 function appserver_drush_command() {
   $items = array();
 
-  $items['appserver-make'] = array(
-    'callback' => 'appserver_drush_make',
-    'description' => dt('Output make file for designated app.'),
-    'aliases' => array('apmk'),
+  $items['appserver-make-make'] = array(
+    'description' => dt('Make (output) a .make file for designated app.'),
+    'aliases' => array('amm'),
     'arguments' => array(
       'nid' => dt('Required. Node ID for selected app.'),
     ),
+    'drupal dependencies' => array('appserver'),
+  );
+  $items['appserver-make-app'] = array(
+    'description' => dt('Build an app.'),
+    'aliases' => array('ama'),
+    'arguments' => array(
+      'nid' => dt('Required. Node ID for selected app.'),
+    ),
+    'drupal dependencies' => array('appserver'),
+    'drupal dependencies' => array('drush_make'),
   );
 
   return $items;
@@ -70,7 +79,7 @@ function appserver_drush_help($section) {
  * @return $output
  *  String, text for a .make file to build the requested app.
  */
-function appserver_drush_make($nid) {
+function drush_appserver_make_make($nid) {
   // Load appserver.pages.inc. We're going to grab the same 
   // info that gets out put to appserver/%node/make.
   module_load_include('inc', 'appserver', 'appserver.pages');
@@ -86,4 +95,20 @@ function appserver_drush_make($nid) {
     $output = appserver_make_page($node);
     drush_print($output);
   }
+}
+
+/**
+ * @param $nid
+ *  Integer. Node id of selected app.
+ *
+ * @param $directory
+ *  String. Directory where app should go.
+ * 
+ * @todo Check for drush_make. Give user feedback and warning if it doesn't exist.
+ */
+function drush_appserver_make_app($nid, $directory = NULL) {
+  // TODO Create directory for app.
+  // TODO Write app.make file inside directory.
+  // TODO Build app via appserver_make_app.  drush -y make --working-copy --no-core 
+  //                 --contrib-destination=. appserver.make.
 }
