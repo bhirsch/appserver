@@ -37,17 +37,24 @@ function _appserver_make_app($nid) {
   $file_contents = '';
   module_load_include('inc', 'appserver', 'appserver.pages');
   $file_contents = appserver_make_page($node);
-  //   Build destination URI for .make file.
-  //   @TODO revisit. Make this private.
+  // Build destination URI for .make file.
   $app_name = $node->field_app_machine_name['und'][0]['safe_value'];
   $file_name = "$app_name.make";
-  $file_path = "appserver/$app_name/$file_name";
-  $destination = file_build_uri($file_path);
+  $path = "appserver/$app_name";
+  // Get "scheme" for file storage, public or private.
+  $scheme = variable_get('appserver_file_scheme', variable_get('file_default_scheme', 'public'));
+  if ($scheme == 'private') {
+    $uri = "$scheme://$path/$file_name";
+    $destination = file_stream_wrapper_uri_normalize($uri);
+  }
+  else if ($scheme == 'public') {
+    $destination = file_build_uri("$path/$file_name");
+  }
   // If the directory doesn't exist, create it
   if (!file_prepare_directory(drupal_dirname($destination), FILE_CREATE_DIRECTORY)) {
     $text = t('The function file_prepare_directory() failed attempting to prepare a '
             . 'directory for !directory. Please notify your system administrator.', 
-            array('!directory' => $file_path));
+            array('!directory' => $path));
     return array('success' => FALSE, 'message' => $text);
   }
   // Create .make file.
@@ -66,15 +73,14 @@ function _appserver_make_app($nid) {
   // Build app by running shell_exec(drush_make).
   // Note: When shell_exec() runs here, everything is relative to the Drupal 
   // installation's root directory.
-  // @TODO Replace hard-coded $destination below with something that uses the File API.
-  //   $file->uri = something like this: 
-  //   public://appserver/ideation/ideation.make
-  //   private://appserver/ideation/ideation.make
-  $destination = "/home/bryan/www/apps/sites/default/files/appserver/$app_name";  
-  //$make_file = "$destination/$file_name";  
+  $files_directory = variable_get('file_' . $scheme . '_path');
+  $destination = "$files_directory/$path";
   $make_file = $file_name;  
-  // @TODO Replace hard-coded $include with admin setting.
-  $include = '/home/bryan/.drush/drush_make';
+  if (!$include = variable_get('appserver_drush_make_path', FALSE)) { 
+    $text = t('drush_make is required for appserver to build apps. Please '
+      . 'install drush_make and enter the path to drush_make here: admin/config/media/appserver.');
+    return array('success' => FALSE, 'message' => $text);
+  };
   $make_tarball = "drush -y make $make_file $app_name --include=$include --no-core --contrib-destination=. --tar";
 //dsm($make_tarball, '$make_tarball');
   // If file already exists, remove it, otherwise drush_make won't rebuild the 
@@ -98,7 +104,13 @@ function _appserver_make_app($nid) {
     // Success!
     $success = TRUE;
   }
-  $text = t('Output from drush_make: ') . $output;    
+  $built = ($success) ? 'built' : 'attempted to build'; 
+  $files_were_stored = ($success) ? 'Files were stored' : 'App Server attempted to store files'; 
+  $text = t("App Server $built the app described in !make. \n "
+          . "$files_were_stored in the !scheme file directory !file_directory. \n"
+          . "Messages returned by drush_make: \n", 
+          array('!make' => $make_file, '!scheme' => $scheme, '!file_directory' => $destination)
+          ) . $output;    
 
   // Return success/failure.
   return array('success' => $success, 'message' => $text);

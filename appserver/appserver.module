@@ -24,6 +24,14 @@ function appserver_menu() {
     'access arguments' => array('access content'),
     'file' => 'appserver.pages.inc',
   );
+  $items['admin/config/media/appserver'] = array(
+    'title' => 'App Server',
+    'description' => 'Tell Drupal where to build and store apps',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('appserver_settings'),
+    'access arguments' => array('admiinister site configuration'),
+    'file' => 'appserver.admin.inc',
+  );
 
   return $items;
 }
