@@ -41,7 +41,7 @@ function appserver_menu() {
  */
 function appserver_form_app_node_form_alter(&$form, &$form_state, $form_id) {
   $form['#submit'][] = 'appserver_make_app';
-dsm($form, 'Note: appserver_make_app is being called on submit. This is just for development.');
+  drupal_set_message('Note: appserver_make_app will be called on submit. This is just for development.');
 }
 
 /**
