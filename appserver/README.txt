@@ -46,6 +46,10 @@ Apps in a private files directory probably get stored somewhere like this:
 
 Drush usage
 -------------
+- `drush appserver-list-apps`
+
+    Show a list of available apps.
+
 - `drush appserver-make-make [app nid]`
 
     Output contents of a make file for the requested app. 

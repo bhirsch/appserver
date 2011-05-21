@@ -4,6 +4,29 @@
  */
 
 /**
+ * Callback for appserver/app/list.
+ * 
+ * @todo Add pager here for when we have a bunch of apps.
+ */
+function appserver_app_list_page() {
+  $limit = arg(3);
+  $apps = appserver_get_apps($limit);  
+  
+  $header = array('nid', t('App Name'));
+  $rows = array();
+  foreach ($apps as $app) {
+    $rows[] = array($app->nid, l($app->title, "node/$app->nid"));
+  }
+
+  $variables = array();
+  $variables['header'] = $header;
+  $variables['rows'] = $rows;
+  
+  return theme('table', $variables);
+}
+
+
+/**
  * Callback for appserver/%node/make/%.
  * 
  * @param $node

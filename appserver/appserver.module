@@ -12,6 +12,9 @@ include_once('appserver.features.inc');
 function appserver_menu() {
   $items = array();
 
+  // Display contents of app make files.
+  // appserver/%node/make displays raw output
+  // appserver/%node/make/html displays makefile contents as HTML.
   $items['appserver/%node/make'] = array(
     'page callback' => 'appserver_make_page',
     'page arguments' => array(1, 3),
@@ -19,11 +22,19 @@ function appserver_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'appserver.pages.inc',
   );
+  // Listing of apps.
+  $items['appserver/app/list'] = array(
+    'page callback' => 'appserver_app_list_page',
+    'access arguments' => array('access content'),
+    'file' => 'appserver.pages.inc',
+  );
+  // jquerymobile listing of apps
   $items['appserver/listview'] = array(
     'page callback' => 'appserver_listview_page',
     'access arguments' => array('access content'),
     'file' => 'appserver.pages.inc',
   );
+  // Configuration page. 
   $items['admin/config/media/appserver'] = array(
     'title' => 'App Server',
     'description' => 'Tell Drupal where to build and store apps',
@@ -81,4 +92,16 @@ function appserver_make_app($nid = NULL) {
   }
 
   return $result;
+}
+
+/**
+ * @return 
+ *  Query result objects with nid and an title for apps. 
+ */
+function appserver_get_apps($limit = FALSE) {
+  $sql = "SELECT nid, title FROM {node} WHERE type = 'app'";
+  $sql = ($limit) ? $sql . " LIMIT $limit" : $sql;
+  $results = db_query($sql)->fetchAll();  
+
+  return $results; 
 }

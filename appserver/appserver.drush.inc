@@ -39,6 +39,14 @@ function appserver_drush_command() {
     ),
     'drupal dependencies' => array('appserver'),
   );
+  $items['appserver-list-apps'] = array(
+    'description' => dt('List apps'),
+    'aliases' => array('ala'),
+    'arguments' => array(
+      'limit' => dt('Optional. Number of apps to display.'),
+    ),
+    'drupal dependencies' => array('appserver'),
+  );
 
   return $items;
 }
@@ -109,6 +117,28 @@ function drush_appserver_make_make($nid) {
  */
 function drush_appserver_make_app($nid, $directory = NULL) {
   // @todo Take $directory as argument.
-
   appserver_make_app($nid);
+}
+
+/**
+ * @param $limit
+ *  Number of apps to return.
+ * 
+ * @return
+ *  List of apps.
+ */
+function drush_appserver_list_apps($limit = NULL) {
+  $output = '';
+
+  $number = ($limit) ? 'all' : $limit;
+  $output .= "\n\t" . dt("App Server List $number Apps:") . "\n\n";
+  $output .= "\t nid \t\t title \n";
+  $output .= "\t ---- \t\t ------ \n";
+
+  $apps = appserver_get_apps($limit);
+  foreach ($apps as $app) {
+    $output .= "\t $app->nid \t\t $app->title \n";
+  }
+
+  drush_print($output);
 }
