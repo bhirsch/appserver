@@ -62,12 +62,8 @@ function _appserver_make_app($nid) {
   //$file_path = $public->getDirectoryPath() . $file_path;
   $text = t('New make file created: !file',
           array('!file' => $file_name));
-dsm("destination: $destination <br/> text: $text", 'success');
-dsm($file, 'saved file');
 
   // Build app by running shell_exec(drush_make).
-$output = shell_exec('pwd');
-dsm($output, 'shell exec output');
   // Note: When shell_exec() runs here, everything is relative to the Drupal 
   // installation's root directory.
   // @TODO Replace hard-coded $destination below with something that uses the File API.
@@ -75,14 +71,14 @@ dsm($output, 'shell exec output');
   //   public://appserver/ideation/ideation.make
   //   private://appserver/ideation/ideation.make
   $destination = "/home/bryan/www/apps/sites/default/files/appserver/$app_name";  
-  $make_file = "$destination/$file_name";  
-//$cmd = 'drush status';
-//$output = shell_exec($cmd);
-//dsm($output, 'drush status');
-  $command = "drush -y make $make_file $app_name --no-core --contrib-destination=$destination --tar";
-dsm($command, 'command');
-  $output = shell_exec($command);
-dsm($output, 'output from shell_exec');
+  //$make_file = "$destination/$file_name";  
+  $make_file = $file_name;  
+  // @TODO Replace hard-coded $include with admin setting.
+  $include = '/home/bryan/.drush/drush_make';
+  $drush_make = "drush -y make $make_file $app_name --include=$include --no-core --contrib-destination=. --tar";
+//$output = shell_exec("cd $destination; pwd; $drush_make");
+//dsm($output, 'shell exec');
+  shell_exec("cd $destination; $drush_make");
 
   // TODO 
   // Return success/failure.
