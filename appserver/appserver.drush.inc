@@ -24,7 +24,7 @@ function appserver_drush_command() {
   $items = array();
 
   $items['appserver-make-make'] = array(
-    'description' => dt('Make (output) a .make file for designated app.'),
+    'description' => dt('Output a .make file for designated app. Required argument: nid.'),
     'aliases' => array('amm'),
     'arguments' => array(
       'nid' => dt('Required. Node ID for selected app.'),
@@ -32,13 +32,12 @@ function appserver_drush_command() {
     'drupal dependencies' => array('appserver'),
   );
   $items['appserver-make-app'] = array(
-    'description' => dt('Build an app.'),
+    'description' => dt('Build a tarball for requested app. Required argument: nid.'),
     'aliases' => array('ama'),
     'arguments' => array(
       'nid' => dt('Required. Node ID for selected app.'),
     ),
     'drupal dependencies' => array('appserver'),
-    'drupal dependencies' => array('drush_make'),
   );
 
   return $items;
@@ -58,8 +57,10 @@ function appserver_drush_command() {
  */
 function appserver_drush_help($section) {
   switch ($section) {
-    case 'drush:appserver-make':
-      return dt("Output info for a .make file to build app.");
+    case 'drush:appserver-make-make':
+      return dt("Output info for a .make file to build app. Required argument: nid.");
+    case 'drush:appserver-make-app':
+      return dt("Build a tarball for requested app. Required argument: nid.");
   }
 }
 
@@ -107,8 +108,7 @@ function drush_appserver_make_make($nid) {
  * @todo Check for drush_make. Give user feedback and warning if it doesn't exist.
  */
 function drush_appserver_make_app($nid, $directory = NULL) {
-  // TODO Create directory for app.
-  // TODO Write app.make file inside directory.
-  // TODO Build app via appserver_make_app.  drush -y make --working-copy --no-core 
-  //                 --contrib-destination=. appserver.make.
+  // @todo Take $directory as argument.
+
+  appserver_make_app($nid);
 }

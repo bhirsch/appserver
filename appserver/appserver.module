@@ -38,15 +38,39 @@ dsm($form, 'Note: appserver_make_app is being called on submit. This is just for
 
 /**
  * Wrapper for _appserver_make_app() in appserver.make.inc.
+ * 
+ * @param $nid
+ *  App node id.
+ * 
+ * @return
+ *  $result array returned by _appserver_make_app.
+ *  array('success' => TRUE/FALSE, 'message' => $text);
  */
-function appserver_make_app() {
-  $arg1 = arg(1);
-  if ($arg1 == 'add') {
-    dsm('appserver_make_app only runs when saving existing nodes. temp. This may only run on submit for development anyway.');
+function appserver_make_app($nid = NULL) {
+  // If no nid is passed, look for it in path.
+  if (!$nid || !is_numeric($nid)) {
+    $arg1 = arg(1);
+    if ($arg1 == 'add') {
+      // @todo Revisit.
+      drupal_set_message('appserver_make_app only runs when saving existing nodes. '
+                       . 'temp. This may only run on submit for development anyway.');
+      return;
+    }
+    else if (is_numeric($arg1)) {
+      // $arg1 is a node id.
+      $nid = $arg1;
+    }
   }
-  else if (is_numeric($arg1)) {
-    // $arg1 is a node id.
-    module_load_include('inc', 'appserver', 'appserver.make');
-    _appserver_make_app($arg1); 
+  module_load_include('inc', 'appserver', 'appserver.make');
+  $result = _appserver_make_app($nid); 
+  if ($result['success'] == TRUE) {
+    drupal_set_message(t('Success'), 'status');
+    drupal_set_message(check_markup($result['message']));
   }
+  else {
+    drupal_set_message(t('Failure'), 'error');
+    drupal_set_message(check_markup($result['message']), 'error');
+  }
+
+  return $result;
 }

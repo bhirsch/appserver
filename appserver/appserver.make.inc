@@ -75,11 +75,31 @@ function _appserver_make_app($nid) {
   $make_file = $file_name;  
   // @TODO Replace hard-coded $include with admin setting.
   $include = '/home/bryan/.drush/drush_make';
-  $drush_make = "drush -y make $make_file $app_name --include=$include --no-core --contrib-destination=. --tar";
-//$output = shell_exec("cd $destination; pwd; $drush_make");
-//dsm($output, 'shell exec');
-  shell_exec("cd $destination; $drush_make");
+  $make_tarball = "drush -y make $make_file $app_name --include=$include --no-core --contrib-destination=. --tar";
+//dsm($make_tarball, '$make_tarball');
+  // If file already exists, remove it, otherwise drush_make won't rebuild the 
+  // tarball.
+  // @todo Make this optional, rather than force re-building existing tarballs.
+  $remove_tarball = "rm $app_name.tar.gz";
+  $output = shell_exec("cd $destination; $remove_tarball; $make_tarball 2>&1;");
+  // Verify drush_make was successful. 
+  // Drush returns "[ok]" or "[error]" after downloading each component in the
+  // the app's .make file. If there are any errors, the last line output returns
+  // "[error]".
+  $start = strripos($output, '[');
+  $end = strripos($output, ']');
+  $length = $end - $start + 1;
+  $result = substr($output, $start, $length);
+  if (!$result == '[ok]') {
+    // Fail. 
+    $success = FALSE;
+  }
+  else {
+    // Success!
+    $success = TRUE;
+  }
+  $text = t('Output from drush_make: ') . $output;    
 
-  // TODO 
   // Return success/failure.
+  return array('success' => $success, 'message' => $text);
 }
