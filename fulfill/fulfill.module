@@ -23,7 +23,11 @@ function fulfill_fulfill() {
 }
 
 function fulfill_transfer() {
-  $uri = 'temporary://channel.xml.zip';
-  $headers = array('Content-Type' => 'application/zip');
+  $uri = 'temporary://project_mapper.tar.gz';
+  $headers = array(
+    'Content-Type' => 'application/x-tar',
+    'Content-Length' => filesize($uri),
+    'X-Fulfill-Name' => basename($uri, '.tar.gz'),
+  );
   file_transfer($uri, $headers);
 }
