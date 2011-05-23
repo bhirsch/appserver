@@ -65,7 +65,7 @@ function appserver_form_app_node_form_alter(&$form, &$form_state, $form_id) {
  *  $result array returned by _appserver_make_app.
  *  array('success' => TRUE/FALSE, 'message' => $text);
  */
-function appserver_make_app($nid = NULL) {
+function appserver_make_app($nid = NULL, $op = array()) {
   // If no nid is passed, look for it in path.
   if (!$nid || !is_numeric($nid)) {
     $arg1 = arg(1);
@@ -81,7 +81,7 @@ function appserver_make_app($nid = NULL) {
     }
   }
   module_load_include('inc', 'appserver', 'appserver.make');
-  $result = _appserver_make_app($nid); 
+  $result = _appserver_make_app($nid, $op); 
   if ($result['success'] == TRUE) {
     drupal_set_message(t('Success'), 'status');
     drupal_set_message(check_markup($result['message']));
