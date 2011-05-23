@@ -17,7 +17,6 @@
  * 
  *
  * @param $op
- *  If no $op is passed, everything defaults to false. 
  *  array(
  *    'no replace' => TRUE/FALSE,      // don't replace existing files
  *    'no tar' => TRUE/FALSE           // don't make tarball
@@ -34,6 +33,16 @@
  *  - Author can only create apps of same name if the version is different.
  */
 function _appserver_make_app($nid, $op = array()) {
+  // Set defaults.
+  if (!$op) {
+    $op = array(
+      'no replace' => FALSE,
+      'no tar' => FALSE,
+      'tar only' => FALSE,
+      'verbose' => TRUE,
+    ); 
+  }
+
   // If node is not an app, notify user and end.
   $node = node_load($nid);
   if ($node->type != 'app') {
@@ -128,7 +137,7 @@ function _appserver_make_app($nid, $op = array()) {
     $success = TRUE;
   }
   // Message to user.
-//  if ($op['verbose']) { 
+  if ($op['verbose']) { 
     $built = ($success) ? 'built' : 'attempted to build'; 
     $files_were_stored = ($success) ? 'Files were stored' : 'App Server attempted to store files'; 
     $text = t("App Server $built the app described in !make. \n "
@@ -136,12 +145,10 @@ function _appserver_make_app($nid, $op = array()) {
             . "Messages returned by drush_make: \n", 
             array('!make' => $make_file, '!scheme' => $scheme, '!file_directory' => $destination)
             ) . $output;    
-  /*
   }
   else {
     $text = ($success) ? $app_name . t(' build successfull.') : $app_name . t(' build failed.');
   }
-  // */
 
   // Return success/failure.
   return array('success' => $success, 'message' => $text);
