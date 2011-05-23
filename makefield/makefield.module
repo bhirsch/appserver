@@ -4,22 +4,6 @@
  */
 
 /**
- * Implements hook_form_FORM_ID_alter().
- */
-/*
-function makefield_form_app_node_form_alter(&$form, &$form_state, $form_id) {
-  // @todo This works for converting the text field into a machine name in the UI.
-  //  But something breaks when the form gets submitted. Debug.
-  $form['field_app_machine_name']['#type'] = 'machine_name';
-  $form['field_app_machine_name']['#machine_name'] = array(
-    'source' => array('title'),
-    'replacement_pattern' => '[^a-z0-9-]+',
-    'replace' => '_',
-  );
-}
-// */
-
-/**
  * Implements hook_field_info().
  */
 function makefield_field_info() {

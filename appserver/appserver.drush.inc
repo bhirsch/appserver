@@ -41,7 +41,6 @@ function appserver_drush_command() {
     'options' => array(
       '--no-tar' => 'Do not create a tarball of the app.', 
       '--tar-only' => 'Only create a tarball of the app.', 
-      '--no-replace' => 'Do not replace existing files.', 
       '--verbose' => 'Show drush make messages.',
     ),
   );
@@ -126,7 +125,6 @@ function drush_appserver_make_app($nid, $directory = NULL) {
 
   // @todo Take $directory as argument.
   $op = array(); 
-  $op['no replace'] = drush_get_option('no-replace');
   $op['no tar'] = drush_get_option('no-tar');
   $op['tar only'] = drush_get_option('tar-only');
   $op['verbose'] = drush_get_option('verbose');

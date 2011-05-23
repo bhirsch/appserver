@@ -28,7 +28,7 @@ function appserver_menu() {
     'access arguments' => array('access content'),
     'file' => 'appserver.pages.inc',
   );
-  // jquerymobile listing of apps
+  // jquerymobile "listview" listing of apps
   $items['appserver/listview'] = array(
     'page callback' => 'appserver_listview_page',
     'access arguments' => array('access content'),
@@ -53,6 +53,55 @@ function appserver_menu() {
 function appserver_form_app_node_form_alter(&$form, &$form_state, $form_id) {
   $form['#submit'][] = 'appserver_make_app';
   drupal_set_message('Note: appserver_make_app will be called on submit. This is just for development.');
+
+  // Use machine_name field to generate machine name for app.
+  $form['app_machine_name'] = array(
+    '#type' => 'machine_name',
+    '#default_value' => '',
+    '#maxlength' => 32,
+    '#disabled' => 0,
+    '#machine_name' => array(
+      'source' => array('title'),
+      'replacement_pattern' => '[^a-z0-9-]+',
+      'replace' => '_',
+      'exists' => 'appserver_check_name',
+    ),
+  );
+  $form['field_app_machine_name']['#type'] = 'hidden';
+}
+
+/**
+ * Implements hook_node_presave().
+ * 
+ * Prepare machine name for saving. 
+ */
+function appserver_node_presave($node) {
+  if ($node->type == 'app') {
+    $node->field_app_machine_name['und'][0]['value'] = check_plain($node->app_machine_name);
+  }  
+}
+
+/**
+ * Callback to make sure app machine name does not exist.
+ * 
+ * @param $name
+ *  String. Machine name to test. 
+ * 
+ * @return
+ *  TRUE, name already exists.
+ *  FALSE, name does not exist yet.
+ */
+function appserver_check_name($name) {
+  $results = db_query("SELECT field_app_machine_name_value "
+                    . "FROM {field_data_field_app_machine_name} mn "
+                    . "WHERE field_app_machine_name_value = :name", 
+                       array(':name' => $name))->fetchAll(); 
+  if ($results) {
+    // Name already exists. 
+    return TRUE;  
+  } else {
+    return FALSE;   
+  }
 }
 
 /**
