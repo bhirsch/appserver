@@ -15,6 +15,16 @@
  * @param $nid.
  *  Node id for app node.
  * 
+ *
+ * @param $op
+ *  If no $op is passed, everything defaults to false. 
+ *  array(
+ *    'no replace' => TRUE/FALSE,      // don't replace existing files
+ *    'no tar' => TRUE/FALSE           // don't make tarball
+ *    'tar only' => TRUE/FALSE         // only create tarball (remove the other stuff)
+ *    'verbose' => TRUE/FALSE, 
+ *  );
+ * 
  * @return $result.
  *  Array. $result = array('success' => TRUE/FALSE, 'message' => 'congrats / error message');
  *
@@ -23,7 +33,7 @@
  *  - No other authors can create apps of same name.
  *  - Author can only create apps of same name if the version is different.
  */
-function _appserver_make_app($nid) {
+function _appserver_make_app($nid, $op = array()) {
   // If node is not an app, notify user and end.
   $node = node_load($nid);
   if ($node->type != 'app') {
@@ -81,13 +91,26 @@ function _appserver_make_app($nid) {
       . 'install drush_make and enter the path to drush_make here: admin/config/media/appserver.');
     return array('success' => FALSE, 'message' => $text);
   };
-  $make_tarball = "drush -y make $make_file $app_name --include=$include --no-core --contrib-destination=. --tar";
-//dsm($make_tarball, '$make_tarball');
-  // If file already exists, remove it, otherwise drush_make won't rebuild the 
-  // tarball.
-  // @todo Make this optional, rather than force re-building existing tarballs.
+
+  // Shell commands. 
+  $remove_projects = "rm -rf modules/ libraries/ themes/";
   $remove_tarball = "rm $app_name.tar.gz";
-  $output = shell_exec("cd $destination; $remove_tarball; $make_tarball 2>&1;");
+  $make_app = "drush -y make $make_file --include=$include --no-core --contrib-destination=. ";
+  $make_tarball = "tar cvfz $app_name.tar.gz $app_name";
+  $remove_uncompressed_files = "rm -rf $app_name";
+
+  // Execute shell commands.
+  if (!$op['no replace']) {
+    shell_exec("cd $destination; $remove_projects; cd .. ; $remove_tarball;");
+  }
+  $output = shell_exec("cd $destination; $make_app 2>&1;");
+  if (!$op['no tar']) {
+    shell_exec("cd $destination; cd .. ; $make_tarball;");
+  }
+  if ($op['tar only'] == 'tar only') {
+    shell_exec("cd $destination; cd .. ; $remove_uncompressed_files; ");
+  }
+
   // Verify drush_make was successful. 
   // Drush returns "[ok]" or "[error]" after downloading each component in the
   // the app's .make file. If there are any errors, the last line output returns
@@ -104,13 +127,21 @@ function _appserver_make_app($nid) {
     // Success!
     $success = TRUE;
   }
-  $built = ($success) ? 'built' : 'attempted to build'; 
-  $files_were_stored = ($success) ? 'Files were stored' : 'App Server attempted to store files'; 
-  $text = t("App Server $built the app described in !make. \n "
-          . "$files_were_stored in the !scheme file directory !file_directory. \n"
-          . "Messages returned by drush_make: \n", 
-          array('!make' => $make_file, '!scheme' => $scheme, '!file_directory' => $destination)
-          ) . $output;    
+  // Message to user.
+//  if ($op['verbose']) { 
+    $built = ($success) ? 'built' : 'attempted to build'; 
+    $files_were_stored = ($success) ? 'Files were stored' : 'App Server attempted to store files'; 
+    $text = t("App Server $built the app described in !make. \n "
+            . "$files_were_stored in the !scheme file directory !file_directory. \n"
+            . "Messages returned by drush_make: \n", 
+            array('!make' => $make_file, '!scheme' => $scheme, '!file_directory' => $destination)
+            ) . $output;    
+  /*
+  }
+  else {
+    $text = ($success) ? $app_name . t(' build successfull.') : $app_name . t(' build failed.');
+  }
+  // */
 
   // Return success/failure.
   return array('success' => $success, 'message' => $text);

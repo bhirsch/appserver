@@ -38,6 +38,12 @@ function appserver_drush_command() {
       'nid' => dt('Required. Node ID for selected app.'),
     ),
     'drupal dependencies' => array('appserver'),
+    'options' => array(
+      '--no-tar' => 'Do not create a tarball of the app.', 
+      '--tar-only' => 'Only create a tarball of the app.', 
+      '--no-replace' => 'Do not replace existing files.', 
+      '--verbose' => 'Show drush make messages.',
+    ),
   );
   $items['appserver-list-apps'] = array(
     'description' => dt('List apps'),
@@ -116,8 +122,16 @@ function drush_appserver_make_make($nid) {
  * @todo Check for drush_make. Give user feedback and warning if it doesn't exist.
  */
 function drush_appserver_make_app($nid, $directory = NULL) {
+  drush_print(dt("\n Building app. \n\n Please wait while files download... \n\n"));
+
   // @todo Take $directory as argument.
-  appserver_make_app($nid);
+  $op = array(); 
+  $op['no replace'] = drush_get_option('no-replace');
+  $op['no tar'] = drush_get_option('no-tar');
+  $op['tar only'] = drush_get_option('tar-only');
+  $op['verbose'] = drush_get_option('verbose');
+
+  appserver_make_app($nid, $op);
 }
 
 /**
