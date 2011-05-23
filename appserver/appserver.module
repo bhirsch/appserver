@@ -1,0 +1,107 @@
+<?php
+/**
+ * @file
+ * Code for the App Server feature.
+ */
+
+include_once('appserver.features.inc');
+
+/**
+ * Implements hook_menu().
+ */
+function appserver_menu() {
+  $items = array();
+
+  // Display contents of app make files.
+  // appserver/%node/make displays raw output
+  // appserver/%node/make/html displays makefile contents as HTML.
+  $items['appserver/%node/make'] = array(
+    'page callback' => 'appserver_make_page',
+    'page arguments' => array(1, 3),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'appserver.pages.inc',
+  );
+  // Listing of apps.
+  $items['appserver/app/list'] = array(
+    'page callback' => 'appserver_app_list_page',
+    'access arguments' => array('access content'),
+    'file' => 'appserver.pages.inc',
+  );
+  // jquerymobile listing of apps
+  $items['appserver/listview'] = array(
+    'page callback' => 'appserver_listview_page',
+    'access arguments' => array('access content'),
+    'file' => 'appserver.pages.inc',
+  );
+  // Configuration page. 
+  $items['admin/config/media/appserver'] = array(
+    'title' => 'App Server',
+    'description' => 'Tell Drupal where to build and store apps',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('appserver_settings'),
+    'access arguments' => array('admiinister site configuration'),
+    'file' => 'appserver.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function appserver_form_app_node_form_alter(&$form, &$form_state, $form_id) {
+  $form['#submit'][] = 'appserver_make_app';
+  drupal_set_message('Note: appserver_make_app will be called on submit. This is just for development.');
+}
+
+/**
+ * Wrapper for _appserver_make_app() in appserver.make.inc.
+ * 
+ * @param $nid
+ *  App node id.
+ * 
+ * @return
+ *  $result array returned by _appserver_make_app.
+ *  array('success' => TRUE/FALSE, 'message' => $text);
+ */
+function appserver_make_app($nid = NULL) {
+  // If no nid is passed, look for it in path.
+  if (!$nid || !is_numeric($nid)) {
+    $arg1 = arg(1);
+    if ($arg1 == 'add') {
+      // @todo Revisit.
+      drupal_set_message('appserver_make_app only runs when saving existing nodes. '
+                       . 'temp. This may only run on submit for development anyway.');
+      return;
+    }
+    else if (is_numeric($arg1)) {
+      // $arg1 is a node id.
+      $nid = $arg1;
+    }
+  }
+  module_load_include('inc', 'appserver', 'appserver.make');
+  $result = _appserver_make_app($nid); 
+  if ($result['success'] == TRUE) {
+    drupal_set_message(t('Success'), 'status');
+    drupal_set_message(check_markup($result['message']));
+  }
+  else {
+    drupal_set_message(t('Failure'), 'error');
+    drupal_set_message(check_markup($result['message']), 'error');
+  }
+
+  return $result;
+}
+
+/**
+ * @return 
+ *  Query result objects with nid and an title for apps. 
+ */
+function appserver_get_apps($limit = FALSE) {
+  $sql = "SELECT nid, title FROM {node} WHERE type = 'app'";
+  $sql = ($limit) ? $sql . " LIMIT $limit" : $sql;
+  $results = db_query($sql)->fetchAll();  
+
+  return $results; 
+}

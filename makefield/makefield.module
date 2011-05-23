@@ -1,0 +1,780 @@
+<?php
+/**
+ * @file makefield.module
+ */
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+/*
+function makefield_form_app_node_form_alter(&$form, &$form_state, $form_id) {
+  // @todo This works for converting the text field into a machine name in the UI.
+  //  But something breaks when the form gets submitted. Debug.
+  $form['field_app_machine_name']['#type'] = 'machine_name';
+  $form['field_app_machine_name']['#machine_name'] = array(
+    'source' => array('title'),
+    'replacement_pattern' => '[^a-z0-9-]+',
+    'replace' => '_',
+  );
+}
+// */
+
+/**
+ * Implements hook_field_info().
+ */
+function makefield_field_info() {
+  return array(
+    'makefield' => array(
+      'label' => t('.Make Field'),
+      'description' => t('This field provides multiple text boxes '
+                        .'for providing all the info required for a single '
+                        .'Drupal project or library in a drush_make .make file.'),
+      'settings' => array(),
+      'instance_settings' => array(),
+      'default_widget' => 'makefield_default',
+      'default_formatter' => 'makefield_default',
+    ),
+  );  
+}
+
+/**
+ * Implements magic callback / psuedo-hook mymodule_field_schema().
+ */
+function makefield_field_schema($field) {
+  if ($field['type'] == 'makefield') {
+    $schema['columns']['name'] = array(
+      'type' => 'varchar',
+      'length' => 80,
+      'not null' => FALSE,
+    );
+    // project_type is either "project" or "library".
+    // This corresponds to lines in .make like this: 
+    // projects[cck][subdir] = ...
+    // libraries[jquery_ui][download][...
+    $schema['columns']['project_type'] = array(
+      'type' => 'varchar',
+      'length' => 20,
+      'not null' => FALSE,
+    );
+    // The following columns correspond to array keys in drush make like this: 
+    //   projects[project_name][column_name] = value
+    // For example: 
+    //   projects[mtheme][version] = 1.0
+    $schema['columns']['version'] = array(
+      'type' => 'varchar',
+      'length' => 20,
+      'not null' => FALSE,
+    );
+    $schema['columns']['subdir'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['location'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['type'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['directory_name'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['l10n_path'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['l10n_url'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // Project download options are stored in columns named
+    // download_key. This gets re-written in .make files like this: 
+    // projects[project_name][download][key] = value
+    //
+    // Download type is either: file, bzr, cvs, git, or svn.
+    $schema['columns']['download_type'] = array(
+      'type' => 'varchar',
+      'length' => 20,
+      'not null' => FALSE,
+    );
+    $schema['columns']['download_url'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // file only: 
+    //   Checksum is an exception to the pattern above. Type is either: 
+    //   md5, sha1, sha256, or sha512. The value is the value of the hash.
+    $schema['columns']['download_checksum_type'] = array(
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => FALSE,
+    );
+    $schema['columns']['download_checksum_value'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['request_type'] = array(
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => FALSE,
+    );
+    $schema['columns']['data'] = array(
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => FALSE,
+    );
+    $schema['columns']['filename'] = array(
+      'type' => 'varchar',
+      'length' => 60,
+      'not null' => FALSE,
+    );
+    // cvs only: 
+    /*
+    $schema['columns']['date'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['root'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['module'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // */
+    // git and cvs: 
+    $schema['columns']['revision'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // git only: 
+    $schema['columns']['branch'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['tag'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // svn only: 
+    $schema['columns']['interactive'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['username'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    $schema['columns']['password'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+
+    // .make files allow you to have multiple patches per 
+    // project. This field only allows one patch per project.
+    //
+    // projects[project_name][patch][][url] = value
+    $schema['columns']['patch_url'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+    // projects[project_name][patch][][md5] = value
+    $schema['columns']['patch_md5'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+
+    // libraries[library_name][destination] = value
+    $schema['columns']['library_destination'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    );
+
+    $schema['indexes'] = array(
+      'height' => array('name'),
+      'width' => array('version'),
+    );
+
+    return $schema;
+  }  
+}
+
+/**
+ * Implements magic callback / psuedo-hook mymodule_field_is_empty().
+ */
+function makefield_field_is_empty($item, $field) {
+  if ($field['type'] == 'makefield') {
+    if (empty($item['name'])) {
+      //@todo add empty handling here. 
+      return TRUE; 
+    } else {
+      return FALSE; 
+    }
+  }
+}
+
+/**
+ * Implements magic callback / psuedo-hook mymodule_field_settings_form().
+ */
+/*
+function makefield_settings_form($field, $instance, $has_data) {
+  if ($field['type'] == 'video_filter') {
+    $settings = $field['setings'];  
+    $form = '';
+    return $form; 
+  }
+}
+// */
+
+/**
+ * Implements hook_field_presave().
+ */
+function makefield_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  $new_values = array();
+  foreach ($items as $delta => $item) {
+    if (!empty($item['name'])) {
+      // Required components.
+      $new_values[$delta]['name'] = $item['name'];
+      $new_values[$delta]['version'] = $item['version'];
+      $new_values[$delta]['project_type'] = $item['project_type'];
+      // Additional components (advanced settings).
+      //foreach ($item['advanced_settings'] as $settings_group){
+      foreach ($item['advanced_settings'] as $group_name => $settings_group){
+        // To get the makefield values get saved correctly, the $items
+        // array has to look like this: 
+        // $items[$delta][$component] = $value;
+        // Build up $new_values array like this, then set $items = $new_values.
+        foreach ($settings_group as $component => $value) {
+          // Git and Bazaar both use tags. The form actually stores two tag values,
+          // one for each. Only save the one corresponding to the download type
+          // selected.
+          if ($component == 'download_type') {
+            $download_type = $value;
+          }
+          if ($group_name == 'download_settings' && is_array($value)
+            && ($component == 'all' || $component == $download_type)) {
+            foreach ($value as $component => $value) {
+              $new_values[$delta][$component] = $value;
+            }
+          }
+          $new_values[$delta][$component] = $value;
+        }
+      }
+    }
+  }
+  $items = $new_values;
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+/*
+function makefield_field_validate($obj_type, $object, $field,
+                                           $instance, $langcode, &$items,
+                                           &$errors) {
+  if ($field['type'] == 'makefield') {
+    // @todo add validation
+  }  
+}
+// */
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function makefield_field_widget_info() {
+  return array(
+    'makefield' => array(
+      'label' => t('.make field'),
+      'description' => t('Enable user to describe projects and libraries for drush_make.'),
+      'field types' => array('makefield'),
+      'behaviors' => array(
+        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+        'default value' => FIELD_BEHAVIOR_DEFAULT,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function makefield_field_widget_form(&$form, &$form_state, $field,
+                                        $instance, $langcode, $items,
+                                        $delta, $element) {
+  $base = $element;   
+  
+  if ($instance['widget']['type'] == 'makefield') {
+    $element['name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Machine Name'),
+      '#default_value' => isset($items[$delta]['name']) ? 
+                          $items[$delta]['name'] : NULL,
+      '#weight' => 1,
+      ) + $base;
+    $element['version'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Version'),
+      '#default_value' => isset($items[$delta]['version']) ? 
+                          $items[$delta]['version'] : NULL,
+      '#description' => t('Specifies the version of the project to retrieve. '
+                        . 'This can be as loose as the major branch number or '
+                        . 'as specific as a particular point release.'),
+      '#weight' => 2,
+    ) + $base;
+    $element['project_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Project Type'),
+      '#default_value' => isset($items[$delta]['project_type']) ? 
+                          $items[$delta]['project_type'] : 'project',
+      '#description' => t('project or library'),
+      '#options' => array(
+        'project' => t('Drupal Project'), 
+        'library' => t('Third Party Library')),
+      '#weight' => 3,
+      ) + $base;
+    // Advanced settings
+    $element['advanced_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Advanced Settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 4,
+    );
+    // File directory.
+    $element['advanced_settings']['directory_group'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'File Directory',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 5,
+    );
+    $element['advanced_settings']['directory_group']['subdir'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Subdirectory'),
+      '#default_value' => isset($items[$delta]['subdir']) ? 
+                          $items[$delta]['subdir'] : NULL,
+      '#description' => t('Place a project within a subdirectory of sites/all/modules/contrib.'),
+    ) + $base;
+    $element['advanced_settings']['directory_group']['directory_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('directory_name'),
+      '#default_value' => isset($items[$delta]['directory_name']) ? 
+                          $items[$delta]['directory_name'] : NULL,
+      '#description' => t('Provide an alternative directory name for this project. '
+                        . 'By default, the project name is used.'),
+    ) + $base;
+    // Location 
+    $element['advanced_settings']['location_group'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('update location'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 10,
+    );
+    $element['advanced_settings']['location_group']['location'] = array(
+      '#type' => 'textfield',
+      '#title' => t('location'),
+      '#default_value' => isset($items[$delta]['location']) ? 
+                          $items[$delta]['location'] : NULL,
+      '#description' => t('URL of an alternate project update XML server to '
+                        . 'use. Allows project XML data to be retrieved from '
+                        . 'sites other than `updates.drupal.org'),
+    ) + $base;
+    $element['advanced_settings']['translation_group'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Translation'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 15,
+    );
+    $element['advanced_settings']['translation_group']['l10n_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('l10n_url'),
+      '#default_value' => isset($items[$delta]['l10n_url']) ? 
+                          $items[$delta]['l10n_url'] : NULL,
+      '#description' => t('URL to an l10n server XML info file. Allows translations ' 
+                    . 'to be retrieved from l10n servers other than localize.drupal.org.'),
+    ) + $base;
+    $element['advanced_settings']['translation_group']['l10n_path'] = array(
+      '#type' => 'textfield',
+      '#title' => t('l10n_path'),
+      '#default_value' => isset($items[$delta]['l10n_path']) ? 
+                          $items[$delta]['l10n_path'] : NULL,
+      '#description' => t('Specific URL (can include tokens) to a translation. Allows '
+        . 'translations to be retrieved from l10n servers other than localize.drupal.org.'),
+    ) + $base;
+
+    // Download Settings
+    $element['advanced_settings']['download_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Download Settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 0,
+    );
+    $element['advanced_settings']['download_settings']['download_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Download Type'), 
+      '#options' => array(
+        '' => t('<none>'),
+        'file' => t('file'),
+        'git' => t('git'),
+        'svn' => t('svn'),
+        'bzr' => t('bazaar'),
+        //'cvs' => t('cvs'),
+      ),
+      '#default_value' => isset($items[$delta]['download_type']) ? 
+                          $items[$delta]['download_type'] : NULL,
+      '#weight' => -10,
+    ) + $base;
+
+    // Download Settings: All
+    $download_type_selection = 'select[name="field_app_makefield[und][' . $delta . '][advanced_settings][download_settings][download_type]"]';
+    $element['advanced_settings']['download_settings']['all'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'invisible' => array(
+          $download_type_selection => array('value' => ''),
+        ),
+      ),
+      '#weight' => -9,
+    );
+    $project_type_selection = 'select[name="field_app_makefield[und][' . $delta . '][project_type]"]';
+    $element['advanced_settings']['download_settings']['all']['type'] = array(
+      '#type' => 'select',
+      '#title' => t('Drupal Project Type'),
+      '#default_value' => isset($items[$delta]['type']) ? 
+                          $items[$delta]['type'] : NULL,
+      '#options' => array(
+        '' => t('<none>'),
+        'core' => t('core'),
+        'module' => t('module'), 
+        'profile' => t('profile'), 
+        'theme' => t('theme')
+      ),
+      '#states' => array(
+        'invisible' => array(
+          $project_type_selection => array('value' => 'library'),
+        ),
+      ),
+      '#description' => t('Type of project. Must be provided if an update '
+        . 'XML source is not specified and/or using version control or direct '
+        . 'retrieval for a project. May be one of the following values: core, '
+        . 'module, profile, theme.'),
+      '#weight' => -8,
+    ) + $base;
+    $element['advanced_settings']['download_settings']['all']['download_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Download URL'),
+      '#default_value' => isset($items[$delta]['download_url']) ? 
+                          $items[$delta]['download_url'] : NULL,
+    ) + $base;
+
+    // Download Settings: File
+    $element['advanced_settings']['download_settings']['file'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          $download_type_selection => array('value' => 'file'),
+        ),
+      ),
+    );
+    $weight = 0;
+    $element['advanced_settings']['download_settings']['file']['filename'] = array(
+      '#type' => 'textfield',
+      '#title' => t('File Name'),
+      '#default_value' => isset($items[$delta]['filename']) ? 
+                          $items[$delta]['filename'] : NULL,
+      '#description' => t("Optional. What to name the file, if it's not an archive."),
+      '#weight' => $weight,
+    ) + $base;
+    $weight++;
+    $element['advanced_settings']['download_settings']['file']['request_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Request Type'), 
+      '#default_value' => isset($items[$delta]['request_type']) ? 
+                          $items[$delta]['request_type'] : NULL,
+      '#description' => t(''),
+      '#options' => array(
+        // get is used by default. This only needs to be written explicitly
+        // in the .make file if the user selects post.
+        '' => t('get'), 
+        //'get' => t('get'), 
+        'post' => t('post')
+      ),
+      '#weight' => $weight,
+    ) + $base;
+    $weight++;
+    $request_type_selection = 'select[name="field_app_makefield[und][' . $delta .'][advanced_settings][download_settings][file][request_type]"]';
+    $element['advanced_settings']['download_settings']['file']['data'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Post Data'),
+      '#default_value' => isset($items[$delta]['data']) ? 
+                          $items[$delta]['data'] : NULL,
+      '#description' => t('Required. The post data to be submitted with the request. ' 
+                        . 'Should be a valid URL query string.'),
+      '#weight' => $weight,
+      '#states' => array(
+        // This setting is only relevant if user selects request_type = post.
+        'invisible' => array(
+           $request_type_selection => array('value' => ''),
+        ),
+      ),
+    ) + $base;
+    $weight++;
+    $element['advanced_settings']['download_settings']['file']['download_checksum_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Checksum Type'),  
+      '#default_value' => isset($items[$delta]['download_checksum_type']) ? 
+                          $items[$delta]['download_checksum_type'] : NULL,
+      '#options' => array(
+        '' => '<none>',
+        'md5' => 'md5',
+        'sha1' => 'sha1',
+        'sha256' => 'sha256',
+        'sha512' => 'sha512',
+      ),
+      '#description' => t('Optional checksum to verify integrity of downloaded file.'),
+      '#weight' => $weight,
+    ) + $base;
+    $weight++;
+    $checksum_type_selection = 'select[name="field_app_makefield[und][0][advanced_settings][download_settings][file][download_checksum_type]"]';
+    $element['advanced_settings']['download_settings']['file']['download_checksum_value'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Checksum Value'),
+      '#default_value' => isset($items[$delta]['download_checksum_value']) ? 
+                          $items[$delta]['download_checksum_value'] : NULL,
+      '#description' => t('Checksum value'),
+      '#states' => array(
+        'invisible' => array(
+           $checksum_type_selection => array('value' => ''),
+        ),
+      ),
+      '#weight' => $weight,
+    ) + $base;
+    $weight++;
+        
+    // Download settings: bzr
+    // Note: As of drush_make v 2.0 there bzr doesn't have any special parameters.
+    $element['advanced_settings']['download_settings']['bzr'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          $download_type_selection  => array('value' => 'bzr'),
+        ),
+      ),
+    );
+    $element['advanced_settings']['download_settings']['bzr']['tag'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Tag'),
+      '#default_value' => isset($items[$delta]['tag']) ? 
+                          $items[$delta]['tag'] : NULL,
+      '#description' => t('Optional. Tag to checkout.'),
+    ) + $base;
+
+    // Download settings: cvs
+    /*
+    $element['advanced_settings']['download_settings']['cvs'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          'select[name="field_app_makefield[und][0][advanced_settings][download_settings][download_type]"]' => array('value' => 'cvs'),
+        ),
+      ),
+    );
+    $element['advanced_settings']['download_settings']['cvs']['date'] = array(
+      '#type' => 'textfield',
+      '#title' => t('date'),
+      '#default_value' => isset($items[$delta]['date']) ? 
+                          $items[$delta]['date'] : NULL,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['advanced_settings']['download_settings']['cvs']['root'] = array(
+      '#type' => 'textfield',
+      '#title' => t('root'),
+      '#default_value' => isset($items[$delta]['root']) ? 
+                          $items[$delta]['root'] : NULL,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['advanced_settings']['download_settings']['cvs']['module'] = array(
+      '#type' => 'textfield',
+      '#title' => t('module'),
+      '#default_value' => isset($items[$delta]['module']) ? 
+                          $items[$delta]['module'] : NULL,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['advanced_settings']['download_settings']['cvs']['revision'] = array(
+      '#type' => 'textfield',
+      '#title' => t('revision'),
+      '#default_value' => isset($items[$delta]['revision']) ? 
+                          $items[$delta]['revision'] : NULL,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    // */
+
+    // Download settings: git
+    $element['advanced_settings']['download_settings']['git'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          $download_type_selection => array('value' => 'git'),
+        ),
+      ),
+    );
+    $element['advanced_settings']['download_settings']['git']['tag'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Tag'),
+      '#default_value' => isset($items[$delta]['tag']) ? 
+                          $items[$delta]['tag'] : NULL,
+      '#description' => t('Optional. Tag to checkout.'),
+    ) + $base;
+    /*
+    $element['advanced_settings']['download_settings']['git']['branch'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Branch'),
+      '#default_value' => isset($items[$delta]['branch']) ? 
+                          $items[$delta]['branch'] : NULL,
+      '#description' => t('Optional. Branch to checkout.'),
+    ) + $base;
+    // */
+
+    // Download settings: svn
+    $element['advanced_settings']['download_settings']['svn'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          $download_type_selection => array('value' => 'svn'),
+        ),
+      ),
+    );
+    /*
+    $element['advanced_settings']['download_settings']['svn']['interactive'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Interactive'),
+      '#default_value' => isset($items[$delta]['interactive']) ? 
+                          $items[$delta]['interactive'] : NULL,
+      '#description' => t('Whether to prompt the user for authentication '
+                        . 'credentials when using a private repository. Allows '
+                        . 'username and/or password options to be omitted.'),
+    ) + $base;
+    $element['advanced_settings']['download_settings']['svn']['username'] = array(
+      '#type' => 'textfield',
+      '#title' => t('username'),
+      '#default_value' => isset($items[$delta]['Username']) ? 
+                          $items[$delta]['username'] : NULL,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['advanced_settings']['download_settings']['svn']['password'] = array(
+      '#type' => 'textfield',
+      '#title' => t('password'),
+      '#default_value' => isset($items[$delta]['password']) ? 
+                          $items[$delta]['password'] : NULL,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    // */
+
+    // Patches
+    $element['advanced_settings']['patch_group'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Patch'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 20,
+    );
+    $element['advanced_settings']['patch_group']['patch_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('patch_url'),
+      '#default_value' => isset($items[$delta]['patch_url']) ? 
+                          $items[$delta]['patch_url'] : NULL,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['advanced_settings']['patch_group']['patch_md5'] = array(
+      '#type' => 'textfield',
+      '#title' => t('patch_md5'),
+      '#default_value' => isset($items[$delta]['patch_md5']) ? 
+                          $items[$delta]['patch_md5'] : NULL,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+    $element['advanced_settings']['library_group'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Library Destination'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 25,
+    );
+    $element['advanced_settings']['library_group']['library_destination'] = array(
+      '#type' => 'textfield',
+      '#title' => t('library_destination'),
+      '#default_value' => isset($items[$delta]['library_destination']) ? 
+                          $items[$delta]['library_destination'] : NULL,
+      '#description' => t(' ADD DESCRIPTION HERE'),
+    ) + $base;
+
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function makefield_field_formatter_info() { 
+  return array(
+    'makefield_default' => array(
+      'label' => t('Make Field'),
+      'field types' => array('makefield'),
+    ),
+  );
+} 
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function makefield_field_formatter_view($obj_type, $object, $field, 
+                                           $instance, $langcode, $items, 
+                                           $display) { 
+  $elements = array();
+  foreach ($items as $delta => $item) {
+    $elements[$delta] = array(
+      '#theme' => 'makefield_default_formatter',
+      '#item' => $item,
+    );
+  }
+
+  return $elements;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function makefield_theme() {
+  return array(
+    'makefield_default_formatter' => array(
+      'variables' => array('item' => NULL),
+      'file' => 'makefield.theme.inc',
+    ),
+  );
+  
+}
