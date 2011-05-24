@@ -39,8 +39,8 @@ function appserver_drush_command() {
     ),
     'drupal dependencies' => array('appserver'),
     'options' => array(
-      '--no-tar' => 'Do not create a tarball of the app.', 
-      '--tar-only' => 'Only create a tarball of the app.', 
+      '--no-tar' => 'Do not create a tarball of the app.',
+      '--tar-only' => 'Only create a tarball of the app.',
       '--verbose' => 'Show drush make messages.',
     ),
   );
@@ -89,12 +89,12 @@ function appserver_drush_help($section) {
  *
  * @param $nid
  *  Node id of an app node.
- * 
+ *
  * @return $output
  *  String, text for a .make file to build the requested app.
  */
 function drush_appserver_make_make($nid) {
-  // Load appserver.pages.inc. We're going to grab the same 
+  // Load appserver.pages.inc. We're going to grab the same
   // info that gets out put to appserver/%node/make.
   module_load_include('inc', 'appserver', 'appserver.pages');
 
@@ -102,7 +102,7 @@ function drush_appserver_make_make($nid) {
   // If node is not an app, notify user and end.
   if ($node->type != 'app') {
     $text = "nid $nid " . dt('is not an app.');
-    drush_print($text);
+    return drush_set_error($text);
   }
   // Node is an app. Get and return the make file.
   else {
@@ -117,14 +117,14 @@ function drush_appserver_make_make($nid) {
  *
  * @param $directory
  *  String. Directory where app should go.
- * 
+ *
  * @todo Check for drush_make. Give user feedback and warning if it doesn't exist.
  */
 function drush_appserver_make_app($nid, $directory = NULL) {
   drush_print(dt("\n Building app. \n\n Please wait while files download... \n\n"));
 
   // @todo Take $directory as argument.
-  $op = array(); 
+  $op = array();
   $op['no tar'] = drush_get_option('no-tar');
   $op['tar only'] = drush_get_option('tar-only');
   $op['verbose'] = drush_get_option('verbose');
@@ -135,7 +135,7 @@ function drush_appserver_make_app($nid, $directory = NULL) {
 /**
  * @param $limit
  *  Number of apps to return.
- * 
+ *
  * @return
  *  List of apps.
  */

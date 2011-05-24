@@ -34,7 +34,7 @@ function appserver_menu() {
     'access arguments' => array('access content'),
     'file' => 'appserver.pages.inc',
   );
-  // Configuration page. 
+  // Configuration page.
   $items['admin/config/media/appserver'] = array(
     'title' => 'App Server',
     'description' => 'Tell Drupal where to build and store apps',
@@ -72,21 +72,21 @@ function appserver_form_app_node_form_alter(&$form, &$form_state, $form_id) {
 
 /**
  * Implements hook_node_presave().
- * 
- * Prepare machine name for saving. 
+ *
+ * Prepare machine name for saving.
  */
 function appserver_node_presave($node) {
   if ($node->type == 'app') {
     $node->field_app_machine_name['und'][0]['value'] = check_plain($node->app_machine_name);
-  }  
+  }
 }
 
 /**
  * Callback to make sure app machine name does not exist.
- * 
+ *
  * @param $name
- *  String. Machine name to test. 
- * 
+ *  String. Machine name to test.
+ *
  * @return
  *  TRUE, name already exists.
  *  FALSE, name does not exist yet.
@@ -94,22 +94,22 @@ function appserver_node_presave($node) {
 function appserver_check_name($name) {
   $results = db_query("SELECT field_app_machine_name_value "
                     . "FROM {field_data_field_app_machine_name} mn "
-                    . "WHERE field_app_machine_name_value = :name", 
-                       array(':name' => $name))->fetchAll(); 
+                    . "WHERE field_app_machine_name_value = :name",
+                       array(':name' => $name))->fetchAll();
   if ($results) {
-    // Name already exists. 
-    return TRUE;  
+    // Name already exists.
+    return TRUE;
   } else {
-    return FALSE;   
+    return FALSE;
   }
 }
 
 /**
  * Wrapper for _appserver_make_app() in appserver.make.inc.
- * 
+ *
  * @param $nid
  *  App node id.
- * 
+ *
  * @return
  *  $result array returned by _appserver_make_app.
  *  array('success' => TRUE/FALSE, 'message' => $text);
@@ -130,8 +130,8 @@ function appserver_make_app($nid = NULL, $op = array()) {
     }
   }
   module_load_include('inc', 'appserver', 'appserver.make');
-  $result = _appserver_make_app($nid, $op); 
-  if ($result['success'] == TRUE) {
+  $result = _appserver_make_app($nid, $op);
+  if ($result['success']) {
     drupal_set_message(t('Success'), 'status');
     drupal_set_message(check_markup($result['message']));
   }
@@ -144,13 +144,13 @@ function appserver_make_app($nid = NULL, $op = array()) {
 }
 
 /**
- * @return 
- *  Query result objects with nid and an title for apps. 
+ * @return
+ *  Query result objects with nid and an title for apps.
  */
 function appserver_get_apps($limit = FALSE) {
   $sql = "SELECT nid, title FROM {node} WHERE type = 'app'";
   $sql = ($limit) ? $sql . " LIMIT $limit" : $sql;
-  $results = db_query($sql)->fetchAll();  
+  $results = db_query($sql)->fetchAll();
 
-  return $results; 
+  return $results;
 }

@@ -3,25 +3,25 @@
  * @file appserver.make.inc
  *  Write app.make files and build apps with drush_make.
  *
- * @todo Note: This works by calling shell_exec(). This is sort of hackish. 
- *  Maybe we should implement a module-based version of drush_make, 
+ * @todo Note: This works by calling shell_exec(). This is sort of hackish.
+ *  Maybe we should implement a module-based version of drush_make,
  *  then call make_make($myapp). Then the fulfill module could call call
  *  appserver_make_app($requested_app) the "normal" way.
  */
 
 /**
  * Make app.
- * 
+ *
  * @param $nid.
  *  Node id for app node.
- * 
+ *
  * @param $op
  *  array(
  *    'no tar' => TRUE/FALSE           // don't make tarball
  *    'tar only' => TRUE/FALSE         // only create tarball (remove the other stuff)
- *    'verbose' => TRUE/FALSE, 
+ *    'verbose' => TRUE/FALSE,
  *  );
- * 
+ *
  * @return $result.
  *  Array. $result = array('success' => TRUE/FALSE, 'message' => 'congrats / error message');
  *
@@ -38,7 +38,7 @@ function _appserver_make_app($nid, $op = array()) {
       'no tar' => FALSE,
       'tar only' => FALSE,
       'verbose' => TRUE,
-    ); 
+    );
   }
 
   // If node is not an app, notify user and end.
@@ -71,14 +71,14 @@ function _appserver_make_app($nid, $op = array()) {
     // If the directory doesn't exist, create it
     if (!file_prepare_directory(drupal_dirname($destination), FILE_CREATE_DIRECTORY)) {
       $text = t('The function file_prepare_directory() failed attempting to prepare a '
-              . 'directory for !directory. Please notify your system administrator.', 
+              . 'directory for !directory. Please notify your system administrator.',
               array('!directory' => $path));
       return array('success' => FALSE, 'message' => $text);
     }
     // Create .make file.
     if (!$file = file_save_data($file_contents, $destination, FILE_EXISTS_REPLACE)) {
       $text = t('The function file_save_data() failed attempting to create the file: !file. '
-              . 'Please notify your system administrator.', 
+              . 'Please notify your system administrator.',
               array('!file' => $file_name));
       return array('success' => FALSE, 'message' => $text);
     }
@@ -89,19 +89,19 @@ function _appserver_make_app($nid, $op = array()) {
             array('!file' => $file_name));
 
     // Build app by running shell_exec(drush_make).
-    // Note: When shell_exec() runs here, everything is relative to the Drupal 
+    // Note: When shell_exec() runs here, everything is relative to the Drupal
     // installation's root directory.
-    $files_directory = variable_get('file_' . $scheme . '_path');
+    $files_directory = drupal_realpath($scheme . '://');
     $make_file = $file_name;
-    if (!$include = variable_get('appserver_drush_make_path', FALSE)) { 
+    if (!$include = variable_get('appserver_drush_make_path', FALSE)) {
       $text = t('drush_make is required for appserver to build apps. Please '
         . 'install drush_make and enter the path to drush_make here: admin/config/media/appserver.');
       return array('success' => FALSE, 'message' => $text);
     };
 
-    // Shell commands. 
-    // @todo add a step here to check for these files, otherwise user gets a 
-    //  message saying these files can't be deleted if they don't exist. 
+    // Shell commands.
+    // @todo add a step here to check for these files, otherwise user gets a
+    //  message saying these files can't be deleted if they don't exist.
     $remove_app = "rm $app_name.tar.gz; rm -r $app_name/modules/; rm -r $app_name/themes/; rm -r $app_name/libraries";
     $make_app = "drush -y make $make_file --include=$include --no-core --contrib-destination=. ";
     $make_tarball = "tar cvfz $app_name.tar.gz $app_name";
@@ -121,7 +121,7 @@ function _appserver_make_app($nid, $op = array()) {
       shell_exec("cd $files_directory/appserver; $remove_uncompressed_files; ");
     }
 
-    // Verify drush_make was successful. 
+    // Verify drush_make was successful.
     // Drush returns "[ok]" or "[error]" after downloading each component in the
     // the app's .make file. If there are any errors, the last line output returns
     // "[error]".
@@ -130,7 +130,7 @@ function _appserver_make_app($nid, $op = array()) {
     $length = $end - $start + 1;
     $result = substr($output, $start, $length);
     if (!$result == '[ok]') {
-      // Fail. 
+      // Fail.
       $success = FALSE;
     }
     else {
@@ -138,14 +138,14 @@ function _appserver_make_app($nid, $op = array()) {
       $success = TRUE;
     }
     // Message to user.
-    if ($op['verbose']) { 
-      $built = ($success) ? 'built' : 'attempted to build'; 
-      $files_were_stored = ($success) ? 'Files were stored' : 'App Server attempted to store files'; 
+    if ($op['verbose']) {
+      $built = ($success) ? 'built' : 'attempted to build';
+      $files_were_stored = ($success) ? 'Files were stored' : 'App Server attempted to store files';
       $text = t("App Server $built the app described in !make. \n "
               . "$files_were_stored in the !scheme file directory !file_directory. \n"
-              . "Messages returned by drush_make: \n", 
+              . "Messages returned by drush_make: \n",
               array('!make' => $make_file, '!scheme' => $scheme, '!file_directory' => $destination)
-              ) . $output;    
+              ) . $output;
     }
     else {
       $text = ($success) ? $app_name . t(' build successfull.') : $app_name . t(' build failed.');
